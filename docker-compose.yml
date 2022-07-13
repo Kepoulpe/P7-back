@@ -1,0 +1,17 @@
+
+volumes:
+  mongo-db-vol:
+
+services:
+    
+  mongo:
+    image: mongo:4.4.15
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo-db-vol:/data/db
+    # connection string => mongodb://root:example@mongo:27017/ 
+    

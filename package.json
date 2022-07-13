@@ -1,0 +1,25 @@
+{
+  "name": "p7-back",
+  "version": "1.0.0",
+  "description": "Groupamia backend",
+  "main": "server.js",
+
+  "author": "Nicolas Moreno",
+  "license": "ISC",
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest",
+    "test:watch": "jest --watch --detectOpenHandles",
+    "dev": "nodemon"
+  },
+  "devDependencies": {
+    "jest": "^28.1.2",
+    "nodemon": "^2.0.19",
+    "superagent": "^8.0.0",
+    "supertest": "^6.2.4"
+  },
+  "dependencies": {
+    "express": "^4.18.1",
+    "mongoose": "^6.4.4"
+  }
+}
