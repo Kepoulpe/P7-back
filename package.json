@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "Groupamia backend",
   "main": "server.js",
-
   "author": "Nicolas Moreno",
   "license": "ISC",
   "scripts": {
     "start": "node server.js",
-    "test": "jest",
-    "test:watch": "jest --watch --detectOpenHandles",
+    "test": "NODE_ENV=test jest",
+    "test:watch": "NODE_ENV=test jest --watch --detectOpenHandles",
+    "test:cache-clear": "jest --clearCache",
     "dev": "nodemon"
   },
   "devDependencies": {
@@ -19,7 +19,10 @@
     "supertest": "^6.2.4"
   },
   "dependencies": {
+    "bcrypt": "^5.0.1",
+    "dotenv": "^16.0.1",
     "express": "^4.18.1",
-    "mongoose": "^6.4.4"
+    "mongoose": "^6.4.4",
+    "mongoose-unique-validator": "^3.1.0"
   }
 }
