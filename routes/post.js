@@ -6,7 +6,11 @@ const auth = require('../middleware/auth');
 const multer = require('../middleware/multer-config');
 
 // user can create one post in the data base mongoDB
-router.post('/', auth, multer, postCtrl.createPost)
+router.post('/', 
+    auth, 
+    multer,
+    postCtrl.createPost
+)
 
 // modify one specific post in the data base mongoDB
 

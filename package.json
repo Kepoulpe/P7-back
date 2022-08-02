@@ -1,14 +1,14 @@
 {
   "name": "p7-back",
   "version": "1.0.0",
-  "description": "Groupamia backend",
+  "description": "Groupomania backend",
   "main": "server.js",
   "author": "Nicolas Moreno",
   "license": "ISC",
   "scripts": {
     "start": "node server.js",
     "test": "NODE_ENV=test jest",
-    "test:watch": "NODE_ENV=test jest --watch --detectOpenHandles",
+    "test:watch": "NODE_ENV=test jest --watch --detectOpenHandles --runInBand",
     "test:cache-clear": "jest --clearCache",
     "dev": "nodemon"
   },

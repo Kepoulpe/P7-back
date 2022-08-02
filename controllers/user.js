@@ -13,7 +13,8 @@ exports.signup = async (req, res, next) => {
         user = new User({
             email: req.body.email,
             userName: req.body.userName,
-            password: hash
+            password: hash,
+            isAdmin: req.body.isAdmin ?? false
         });
     } catch (error) {
         console.error("ERROR FROM BCRYPT", error);
@@ -38,7 +39,6 @@ exports.signup = async (req, res, next) => {
 };
 
 // controller for user login
-
 exports.login = async (req, res, next) => {
     User.findOne({ email: req.body.email })
         .then(user => {
@@ -59,10 +59,26 @@ exports.login = async (req, res, next) => {
                         ),
                         isAdmin: user.isAdmin
                     });
-                    if (process.env.NODE_ENV == "test") {
-                        user.deleteOne({ email: req.body.email });
-                    }
+                    // if (process.env.NODE_ENV == "test") {
+                    //     user.deleteOne({ email: req.body.email });
+                    // }
                 })
         })
         .catch(err => res.status(500).json({ err }))
 };
+
+exports.delete = async (req, res) => {
+    let user;
+    try {
+        user = await User.findById(req.body.userId);
+    } catch (error) {
+        res.status(404).json({ error: 'Utilisateur non trouvé' });
+        return;
+    }
+    try {
+        await User.deleteOne({ _id: req.body.userId });
+        res.status(200).json({ msg: 'Utilisateur supprimé' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erreur lors de la suppression de l\'utilisateur' });
+    }
+}

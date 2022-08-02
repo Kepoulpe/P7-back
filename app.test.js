@@ -4,6 +4,8 @@ const mongoose = require("mongoose");
 const user = require("./models/user");
 const jwt = require("jsonwebtoken");
 
+let userLoginResponseBody;
+
 beforeAll(async () => {
   try {
     mongoose.connect(process.env.MONGODB_TEST_CONNECTION_STRING, {
@@ -45,7 +47,7 @@ describe("test / route", () => {
   test("given a visitor, when he creates an account with correct inputs, then it should return 201 status code and {msg : 'user created'}", () => {
     return request(app) 
       .post("/api/auth/signup")
-      .send({email: 'moreno.n@hotmail.fr', userName: 'Nicolas', password: "#Ni58695o", isAdmin: 1})
+      .send({email: 'moreno.n@hotmail.fr', userName: 'Nicolas', password: "#Ni58695o", isAdmin: true})
       .set('Accept', 'application/json')
       .then(response => {
         expect(response.statusCode).toBe(201);
@@ -54,7 +56,7 @@ describe("test / route", () => {
       })
   });
   // test user login route
-  test("given a user, when he login with correct inputs, then it should return 200 status code and {userId: user._id,token: jwt.sign({userId : user._id},process.env.RANDOM_SECRET_TOKEN,{ expiresIn: '24h'})}", () => {
+  test("given an admin user, when he logs in with correct inputs, then it should return a 200 status code and response body `isAdmin` should be true", () => {
     return request(app) 
       .post("/api/auth/login")
       .send({email: 'moreno.n@hotmail.fr', password: "#Ni58695o"})
@@ -62,30 +64,42 @@ describe("test / route", () => {
       .then(response => {
         expect(response.statusCode).toBe(200);
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-        expect(response.body).toStrictEqual({
-          userId: response.body.userId,
-          token: jwt.sign(
-              {userId : response.body.userId},
-              process.env.RANDOM_SECRET_TOKEN,
-              { expiresIn: '24h'}
-          ),
-          isAdmin: response.body.isAdmin
-      });
+        expect(response.body.isAdmin).toBe(true);
+        userLoginResponseBody = response.body;
       })
   });
+
   // test for create one post route
-  test("given a user, when he create a post, then it should return 201 status code and {msg: post created}", () => {
+  test("given an existing user, when he creates a post, then it should return a 201 status code and {msg: post created}", async () => {
     return request(app) 
-      .post("/api/post")
-      .send({content : 'test post'})
+      .post("/api/posts")
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
       .set('Accept', 'application/json')
+      .send({
+        userId:  userLoginResponseBody.userId,
+        content : "test post"
+      })
       .then(response => {
         expect(response.statusCode).toBe(201);
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
         console.log(response.body);
         expect(response.body).toStrictEqual({
           msg: 'post created'
-      });
+        });
+      })
+  });
+
+
+  test("given an existing user, when he sends a request to delete his account, then it should return a 200 status code and payload {msg: 'Utilisateur supprimé'}", async () => {
+    return request(app) 
+      .post("/api/auth/delete")
+      .send({userId: userLoginResponseBody.userId})
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Accept', 'application/json')
+      .then(response => {
+        expect(response.statusCode).toBe(200);
+        expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+        expect(response.body.msg).toStrictEqual('Utilisateur supprimé');
       })
   });
 

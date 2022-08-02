@@ -40,6 +40,6 @@ app.get( "/" , (req, res) => {
 
 app.use('/api/auth', userRoutes);
 
-app.use('/api/post', postRoutes);
+app.use('/api/posts', postRoutes);
 
 module.exports = app;

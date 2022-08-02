@@ -13,7 +13,6 @@ const normalizePort = val => {
   return false;
 };
   
-// TODO make sure 3000 port is not in use
 const port = normalizePort(process.env.PORT ||'3000');
 
 const errorHandler = error => {
