@@ -45,7 +45,7 @@ describe("test / route", () => {
   test("given a visitor, when he creates an account with correct inputs, then it should return 201 status code and {msg : 'user created'}", () => {
     return request(app) 
       .post("/api/auth/signup")
-      .send({email: 'moreno.n@hotmail.fr', password: "#Ni58695o", isAdmin: 1})
+      .send({email: 'moreno.n@hotmail.fr', userName: 'Nicolas', password: "#Ni58695o", isAdmin: 1})
       .set('Accept', 'application/json')
       .then(response => {
         expect(response.statusCode).toBe(201);
@@ -62,7 +62,6 @@ describe("test / route", () => {
       .then(response => {
         expect(response.statusCode).toBe(200);
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-        console.log(response.body);
         expect(response.body).toStrictEqual({
           userId: response.body.userId,
           token: jwt.sign(
@@ -71,6 +70,21 @@ describe("test / route", () => {
               { expiresIn: '24h'}
           ),
           isAdmin: response.body.isAdmin
+      });
+      })
+  });
+  // test for create one post route
+  test("given a user, when he create a post, then it should return 201 status code and {msg: post created}", () => {
+    return request(app) 
+      .post("/api/post")
+      .send({content : 'test post'})
+      .set('Accept', 'application/json')
+      .then(response => {
+        expect(response.statusCode).toBe(201);
+        expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+        console.log(response.body);
+        expect(response.body).toStrictEqual({
+          msg: 'post created'
       });
       })
   });
