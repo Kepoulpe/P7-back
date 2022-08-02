@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 // controller for user signup
+
 exports.signup = async (req, res, next) => {
 
     let user;
@@ -11,6 +12,7 @@ exports.signup = async (req, res, next) => {
         const hash = await bcrypt.hash(req.body.password, 10);
         user = new User({
             email: req.body.email,
+            userName: req.body.userName,
             password: hash
         });
     } catch (error) {
@@ -34,40 +36,10 @@ exports.signup = async (req, res, next) => {
             .json({ error });
     }
 };
+
 // controller for user login
 
 exports.login = async (req, res, next) => {
-
-    // try {
-    //     await User.findOne({ email: req.body.email })
-    // } catch (error) {
-    //     res
-    //         console.log(error)
-    //         .status(401)
-    //         .json({ msg: 'user not found' })
-
-    // }
-    // try {
-    //     console.log("Test");
-    //     await bcrypt.compare(req.body.password, user.password);
-    //     res
-    //         .status(200)
-    //         .json({
-    //             userId: user._id,
-    //             token: jwt.sign(
-    //                 { userId: user._id },
-    //                 process.env.RANDOM_SECRET_TOKEN,
-    //                 { expiresIn: '24h' }
-    //             )
-    //         });
-    //         if (process.env.NODE_ENV == "test") {
-    //             await user.deleteOne({ email: req.body.email });
-    //         }
-    // } catch (error) {
-    //     res
-    //         .status(401)
-    //         .json({ msg: 'invlaid password' })
-    // }
     User.findOne({ email: req.body.email })
         .then(user => {
             if (!user) {
@@ -88,7 +60,7 @@ exports.login = async (req, res, next) => {
                         isAdmin: user.isAdmin
                     });
                     if (process.env.NODE_ENV == "test") {
-                         user.deleteOne({ email: req.body.email });
+                        user.deleteOne({ email: req.body.email });
                     }
                 })
         })
