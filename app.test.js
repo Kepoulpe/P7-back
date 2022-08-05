@@ -69,7 +69,7 @@ describe("test / route", () => {
       })
   });
 
-  // test for create one post route
+  // test for create one post without picture route
   test("given an existing user, when he creates a post, then it should return a 201 status code and {msg: post created}", async () => {
     return request(app) 
       .post("/api/posts")
@@ -78,6 +78,27 @@ describe("test / route", () => {
       .send({
         userId:  userLoginResponseBody.userId,
         content : "test post"
+      })
+      .then(response => {
+        expect(response.statusCode).toBe(201);
+        expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+        console.log(response.body);
+        expect(response.body).toStrictEqual({
+          msg: 'post created'
+        });
+      })
+  });
+
+  // test for create one post with picture route
+  test("given an existing user, when he creates a post with a picture, then it should return a 201 status code and {msg: post created}", async () => {
+    return request(app) 
+      .post("/api/posts")
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Accept', 'application/json')
+      .send({
+        userId:  userLoginResponseBody.userId,
+        content : "test post",
+        imageUrl: "imageUrldeTest"
       })
       .then(response => {
         expect(response.statusCode).toBe(201);
