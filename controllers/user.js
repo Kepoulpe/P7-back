@@ -59,9 +59,6 @@ exports.login = async (req, res, next) => {
                         ),
                         isAdmin: user.isAdmin
                     });
-                    // if (process.env.NODE_ENV == "test") {
-                    //     user.deleteOne({ email: req.body.email });
-                    // }
                 })
         })
         .catch(err => res.status(500).json({ err }))

@@ -69,8 +69,46 @@ describe("test / route", () => {
       })
   });
 
-  // test for create one post without picture route
-  test("given an existing user, when he creates a post, then it should return a 201 status code and {msg: post created}", async () => {
+  // test for create one post without picture route with wrong user 
+  // test("given an fake user, when he creates a post, then it should return a 404 status code and {msg: Utilisateur non trouvé}", async () => {
+  //   return request(app) 
+  //     .post("/api/posts")
+  //     .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+  //     .set('Accept', 'application/json')
+  //     .send({
+  //       userId:  "paslebonId",
+  //       content : "test post"
+  //     })
+  //     .then(response => {
+  //       expect(response.statusCode).toBe(404);
+  //       expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+  //       expect(response.body).toStrictEqual({
+  //         msg: 'Utilisateur non trouvé'
+  //       });
+  //     })
+  // });
+
+    // test for create one post without picture route 
+    test("given an existing user, when he creates a post, then it should return a 201 status code and {msg: Post créeé", async () => {
+      return request(app) 
+        .post("/api/posts")
+        .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+        .set('Accept', 'application/json')
+        .send({
+          userId:  userLoginResponseBody.userId,
+          content : "test post"
+        })
+        .then(response => {
+          expect(response.statusCode).toBe(201);
+          expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+          expect(response.body).toStrictEqual({
+            msg: 'Post créé'
+          });
+        })
+    });
+
+  // test for create one post with picture route
+  test("given an existing user, when he creates a post with a picture, then it should return a 201 status code and {msg: Post crée}", async () => {
     return request(app) 
       .post("/api/posts")
       .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
@@ -82,31 +120,22 @@ describe("test / route", () => {
       .then(response => {
         expect(response.statusCode).toBe(201);
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-        console.log(response.body);
         expect(response.body).toStrictEqual({
-          msg: 'post created'
+          msg: 'Post créé'
         });
       })
   });
 
-  // test for create one post with picture route
-  test("given an existing user, when he creates a post with a picture, then it should return a 201 status code and {msg: post created}", async () => {
+  // test for cgetting one post in the data base mongoDB
+  test("given an existing user, when he open lobby page, then it should return a 200 status code an object with all the posts", async () => {
     return request(app) 
-      .post("/api/posts")
+      .get("/api/posts")
       .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
       .set('Accept', 'application/json')
-      .send({
-        userId:  userLoginResponseBody.userId,
-        content : "test post",
-        imageUrl: "imageUrldeTest"
-      })
       .then(response => {
-        expect(response.statusCode).toBe(201);
+        expect(response.statusCode).toBe(200);
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-        console.log(response.body);
-        expect(response.body).toStrictEqual({
-          msg: 'post created'
-        });
+        expect(response.body).toStrictEqual({});
       })
   });
 
