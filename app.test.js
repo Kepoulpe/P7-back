@@ -69,46 +69,7 @@ describe("test / route", () => {
       })
   });
 
-  // test for create one post without picture route with wrong user 
-  // test("given an fake user, when he creates a post, then it should return a 404 status code and {msg: Utilisateur non trouvé}", async () => {
-  //   return request(app) 
-  //     .post("/api/posts")
-  //     .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
-  //     .set('Accept', 'application/json')
-  //     .send({
-  //       userId:  "paslebonId",
-  //       content : "test post"
-  //     })
-  //     .then(response => {
-  //       expect(response.statusCode).toBe(404);
-  //       expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-  //       expect(response.body).toStrictEqual({
-  //         msg: 'Utilisateur non trouvé'
-  //       });
-  //     })
-  // });
-
-    // test for create one post without picture route 
-    test("given an existing user, when he creates a post, then it should return a 201 status code and {msg: Post créeé", async () => {
-      return request(app) 
-        .post("/api/posts")
-        .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
-        .set('Accept', 'application/json')
-        .send({
-          userId:  userLoginResponseBody.userId,
-          content : "test post"
-        })
-        .then(response => {
-          expect(response.statusCode).toBe(201);
-          expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-          expect(response.body).toStrictEqual({
-            msg: 'Post créé'
-          });
-        })
-    });
-
-  // test for create one post with picture route
-  test("given an existing user, when he creates a post with a picture, then it should return a 201 status code and {msg: Post crée}", async () => {
+  test("given an existing user, when he creates a post without a picture, then it should return a 201 status code and the expected payload", async () => {
     return request(app) 
       .post("/api/posts")
       .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
@@ -120,24 +81,83 @@ describe("test / route", () => {
       .then(response => {
         expect(response.statusCode).toBe(201);
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-        expect(response.body).toStrictEqual({
-          msg: 'Post créé'
-        });
+        expect(response.body.msg).toStrictEqual("Post créé");
+        expect(response.body.success).toBeTruthy();
+        expect(response.body.data.content).toStrictEqual("test post");
       })
   });
 
-  // test for cgetting one post in the data base mongoDB
-  test("given an existing user, when he open lobby page, then it should return a 200 status code an object with all the posts", async () => {
+  // test("given an existing user, when he creates a post with a picture, then it should return a 201 status code and the expected payload", async () => {
+  //   return request(app) 
+  //     .post("/api/posts")
+  //     .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+  //     .set('Accept', 'multipart/form-data')
+  //     // TODO send form data with supertest ./test.png https://stackoverflow.com/questions/52359964/how-to-send-a-formdata-object-with-supertest
+  //     // ! here use attach instead of send
+  //     // .send({
+  //     //   userId:  userLoginResponseBody.userId,
+  //     //   content : "test post"
+  //     // })
+  //     .then(response => {
+  //       expect(response.statusCode).toBe(201);
+  //       expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+  //       expect(response.body).toStrictEqual({
+  //         data: null,
+  //         msg: "Utilisateur non valide",
+  //         success: false
+  //       });
+  //     })
+  // });
+
+  test('given a user with a fake JWT token, when he creates a post, then it should return a 401 status code and the expected response payload', async () => {
     return request(app) 
-      .get("/api/posts")
-      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .post("/api/posts")
+      .set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3ODkwIiwiY29udGVudCI6IllPTE8gSSdtIGEgaGFja2VyIn0.mNt9fPfJ3OGVg2fpRkDdzBCm7J_M-ZeOPwP4Rd9Lxmw')
       .set('Accept', 'application/json')
-      .then(response => {
-        expect(response.statusCode).toBe(200);
-        expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-        expect(response.body).toStrictEqual({});
+      .send({
+        userId:  userLoginResponseBody.userId,
+        content : "test post"
       })
+      .then(response => {
+        expect(response.statusCode).toBe(401);
+        expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+        expect(response.body).toStrictEqual({
+          data: null,
+          msg: "Utilisateur non valide",
+          success: false
+      });
+    });
   });
+
+  // test("given an existing user, when he open lobby page, then it should return a 200 status code an object with all the posts", async () => {
+  //   // TODO create 2 posts beforehand
+  //   // TODO get the ids of the posts created
+  //   // TODO define what the expected response should be
+  //   const expected = {
+  //     data: [
+  //       {
+  //         _id: "some_id" // TODO from actual posts you created
+  //         // other fields
+  //       },
+  //       {
+  //         _id: "some_id" // TODO from actual posts you created
+  //         // other fields
+  //       }
+  //     ],
+  //     msg: "posts fetched",
+  //     success: true
+  //   }
+  //   return request(app) 
+  //     .get("/api/posts")
+  //     .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+  //     .set('Accept', 'application/json')
+  //     .then(response => {
+  //       expect(response.statusCode).toBe(200);
+  //       expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+  //       expect(response.body).toStrictEqual(expected);
+  //     })
+  //     // TODO here or later or in the after each method => delete the created posts
+  // });
 
 
   test("given an existing user, when he sends a request to delete his account, then it should return a 200 status code and payload {msg: 'Utilisateur supprimé'}", async () => {

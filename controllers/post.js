@@ -9,6 +9,7 @@ exports.createPost = (req, res, next) => {
     // } catch (error) {
     //     res.status(404).json({ error: 'Utilisateur non reconnu' });
     // }
+    // TODO DRY
     try {
         const postObj = req.body;
         delete postObj._id;
@@ -18,14 +19,22 @@ exports.createPost = (req, res, next) => {
                 imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
             });
             post.save()
-                .then(() => res.status(201).json({ msg: 'Post créé' }))
+                .then(post => res.status(201).json({
+                    data: post,
+                    msg: "Post créé",
+                    success: true
+                }))
                 .catch(error => res.status(400).json({ error }));
         } else {
             const post = new Post({
                 ...postObj,
             });
             post.save()
-                .then(() => res.status(201).json({ msg: 'Post créé' }))
+                .then(() => res.status(201).json({
+                    data: post,
+                    msg: "Post créé",
+                    success: true
+                }))
                 .catch(error => res.status(400).json({ error }));
         }
     } catch (error) {
@@ -37,7 +46,11 @@ exports.createPost = (req, res, next) => {
 exports.getAllPosts = (req, res, next) => {
     try {
         Post.find()
-            .then(posts => res.status(200).json(posts))
+            .then(posts => res.status(200).json({
+                data: posts,
+                msg: "posts fetched",
+                success: true
+            }))
             .catch(error => res.status(404).json({ msg: 'Pas de posts à afficher' }));
     } catch (error) {
         res.status(500).json({ error: 'Erreur veuillez reéssayer ultérieurement' });
