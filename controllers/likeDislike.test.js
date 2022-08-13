@@ -1,77 +1,195 @@
-/**
- * 
- * @description handles the logic of liking disliking a sauce
- * 
- * @param {Object} formattedLikeObj the sauce from the database, formatted for this logic {userId, likes, dislikes, usersLiked, usersDisliked, _id}
- * @param {like: number, userId: string} reqPayload the incoming request payload
- * 
- * @returns {$inc: { likes: number }, $push: { usersLiked: string[] }, _id: string} // _id is the id from MongoDB
- * 
- * ! can also return false
- * 
- */
- exports.likeDislikeLogic = (formattedLikeObj, reqPayload) => {
-    const like = reqPayload.like;
-    // this if block is for the case the user who has created a sauce tries to update its like data
-    // this other if bloc is for the case a user tries to like/dislike a sauce twice
-    if (
-        // formattedLikeObj.userId == reqPayload.userId ||
-        like === 1 && formattedLikeObj.usersLiked.includes(reqPayload.userId)
-        || like === -1 && formattedLikeObj.usersDisliked.includes(reqPayload.userId)
-    ) {
-        return false;
-    }
-    switch (like) {
-        case 1:
-            if (formattedLikeObj.usersDisliked.includes(reqPayload.userId)) {
-                const resLikeWhenDislike = { $inc: { likes: formattedLikeObj.likes },$inc: { dislikes: formattedLikeObj.likes },$pull: { usersDisliked: formattedLikeObj.usersDisliked }, $push: { usersLiked: formattedLikeObj.usersLiked }, _id: formattedLikeObj._id };
-                resLikeWhenDislike.$inc = { likes: 1 }
-                resLikeWhenDislike.$inc = { dislikes: -1 }
-                resLikeWhenDislike.$push = { usersLiked: reqPayload.userId}
-                resLikeWhenDislike.$pull = { usersDisliked: reqPayload.userId };
-                return resLikeWhenDislike;
-            } else {
-                const resLike = { $inc: { likes: formattedLikeObj.likes }, $push: { usersLiked: formattedLikeObj.usersLiked }, _id: formattedLikeObj._id };
-                resLike.$inc = { likes: 1 }
-                resLike.$push.usersLiked.push(reqPayload.userId);
-                return resLike;
-            }
+const likeDislikeLogic = require("./likeDislike");
+const likeDislikePostLogic = likeDislikeLogic.likeDislikeLogic;
 
 
-        case -1:
-            if (formattedLikeObj.userId == reqPayload.userId) {
-                return false;
-            }
-            if (formattedLikeObj.usersLiked.includes(reqPayload.userId)) {
-                const resDislikeWhenLike = { $inc: { likes: formattedLikeObj.likes },$inc: { dislikes: formattedLikeObj.likes },$push: { usersDisliked: formattedLikeObj.usersDisliked }, $pull: { usersLiked: formattedLikeObj.usersLiked }, _id: formattedLikeObj._id };
-                resDislikeWhenLike.$inc = { likes: -1 }
-                resDislikeWhenLike.$inc = { dislikes: 1 }
-                resDislikeWhenLike.$pull = { usersLiked: reqPayload.userId}
-                resDislikeWhenLike.$push = { usersDisliked: reqPayload.userId };
-                return resDislikeWhenLike;
-            } else {
-            const resDislike = { $inc: { dislikes: formattedLikeObj.dislikes }, $push: { usersDisliked: formattedLikeObj.usersDisliked }, _id: formattedLikeObj._id };
-            resDislike.$inc = { dislikes: 1 }
-            resDislike.$push.usersDisliked.push(reqPayload.userId);
-            return resDislike;
-            }
-        case 0:
-            // if usersDisliked already contains req payload userId it should remove 1 from the dislikes count and remove userId from the usersDislikd array
-            if (formattedLikeObj.usersDisliked.includes(reqPayload.userId)) {
-                const resUndislike = { $inc: { dislikes: formattedLikeObj.dislikes }, $pull: { usersDisliked: formattedLikeObj.usersDisliked }, _id: formattedLikeObj._id };
-                resUndislike.$inc = { dislikes: -1 }
-                resUndislike.$pull = { usersDisliked: reqPayload.userId };
-                return resUndislike;
-            } else if (formattedLikeObj.usersLiked.includes(reqPayload.userId)) {
-                const resUnLike = { $inc: { likes: formattedLikeObj.likes }, $pull: { usersLiked: formattedLikeObj.usersLiked }, _id: formattedLikeObj._id };
-                resUnLike.$inc = { likes: -1 }
-                resUnLike.$pull = { usersLiked: reqPayload.userId };
-                return resUnLike;
-            }
-        default:
-            console.log("Something went wrong");
-            return false;
-    }
+// test suite
+describe("testing like/dislike", () => {
+    it("given a user who has NOT created a post, when he likes a post, then the likes prop of the post is incremented by 1", () => {
+        // arrange
+        const expected = {$inc: { likes: 1 }, $push: { usersLiked: ["x"] }, _id: "1234"};
+        const testInitialPost = {
+            _id: "1234",
+            userId: "y", 
+            likes: 0, 
+            dislikes: 0, 
+            usersLiked: [], 
+            usersDisliked: [] 
+        };
+        const testReqPayload = {
+            like: 1,
+            userId: "x"
+        }
+        // act
+        const actual = likeDislikePostLogic(testInitialPost, testReqPayload);
+        // assert
+        expect(actual).toEqual(expected);
+    });
 
+    it("given a user who has NOT created a post, when he likes a post, then his userId should be pushed to the usersLiked array", () => {
+        // arrange
+        const expected = {$inc: { likes: 1 }, $push: { usersLiked: ["x"] }, _id: "1234"};
+        const testInitialPost = {
+            _id: "1234",
+            userId: "y", 
+            likes: 0, 
+            dislikes: 0, 
+            usersLiked: [], 
+            usersDisliked: [] 
+        };
+        const testReqPayload = {
+            like: 1,
+            userId: "x"
+        }
+        // act
+        const actual = likeDislikePostLogic(testInitialPost, testReqPayload);
+        // assert
+        expect(actual).toEqual(expected);
+    });
 
-};
+    it("given a user who has NOT created a post, when he likes a post that he has already liked, then it should return false", () => {
+        // arrange
+        const expected = false;
+        const testInitialPost = {
+            _id: "1234",
+            userId: "y", 
+            likes: 0, 
+            dislikes: 0, 
+            usersLiked: ["x"], 
+            usersDisliked: [] 
+        };
+        const testReqPayload = {
+            like: 1,
+            userId: "x"
+        }
+        // act
+        const actual = likeDislikePostLogic(testInitialPost, testReqPayload);
+        // assert
+        expect(actual).toEqual(expected);
+    });
+
+    it("given a user who has NOT created a Post, when he dislikes a Post that he has already disliked, then it should return false", () => {
+        // arrange
+        const expected = false;
+        const testInitialPost = {
+            _id: "1234",
+            userId: "y", 
+            likes: 0, 
+            dislikes: 0, 
+            usersLiked: [], 
+            usersDisliked: ["x"] 
+        };
+        const testReqPayload = {
+            like: -1,
+            userId: "y"
+        }
+        // act
+        const actual = likeDislikePostLogic(testInitialPost, testReqPayload);
+        // assert
+        expect(actual).toEqual(expected);
+    });
+
+    it("given a user who has NOT created a Post, when he dislikes a Post, then the dislikes prop of the Post is incremented by 1", () => {
+        // arrange
+        const expected = {$inc: { dislikes: 1 }, $push: { usersDisliked: ["x"] }, _id: "1234"};
+        const testInitialPost = {
+            _id: "1234",
+            userId: "y", 
+            likes: 0, 
+            dislikes: 0, 
+            usersLiked: [], 
+            usersDisliked: [] 
+        };
+        const testReqPayload = {
+            like: -1,
+            userId: "x"
+        }
+        // act
+        const actual = likeDislikePostLogic(testInitialPost, testReqPayload);
+        // assert
+        expect(actual).toEqual(expected);
+    });
+
+    it("given a user who has NOT created a Post, when he dislikes a Post, then his userId should be push to the usersDisliked array", () => {
+        // arrange
+        const expected = {$inc: { dislikes: 1 }, $push: { usersDisliked: ["x"] }, _id: "1234"};
+        const testInitialPost = {
+            _id: "1234",
+            userId: "y", 
+            likes: 0, 
+            dislikes: 0, 
+            usersLiked: [], 
+            usersDisliked: [] 
+        };
+        const testReqPayload = {
+            like: -1,
+            userId: "x"
+        }
+        // act
+        const actual = likeDislikePostLogic(testInitialPost, testReqPayload);
+        // assert
+        expect(actual).toEqual(expected);
+    });
+
+    it("given a user who has NOT created a Post, when he unDislikes a Post, then the dislikes prop of the Post is decremented by 1 and his user id added to the pull array under the usersDisliked key", () => {
+        // arrange
+        const expected = {$inc: { dislikes: -1 }, $pull: { usersDisliked: "x" }, _id: "1234"};
+        const testInitialPost = {
+            _id: "1234",
+            userId: "y", 
+            likes: 0, 
+            dislikes: 1, 
+            usersLiked: [], 
+            usersDisliked: ["x"] 
+        };
+        const testReqPayload = {
+            like: 0,
+            userId: "x"
+        }
+        // act
+        const actual = likeDislikePostLogic(testInitialPost, testReqPayload);
+        // assert
+        expect(actual).toEqual(expected);
+    });
+
+    it("given a user who has NOT created a Post, when he likes a Post that he had already dislikes , then the likes prop of the Post is incremented by 1  and the dislikes prop decremented by 1 and his userId is added and pull from the right arrays", () => {
+        // arrange
+        const expected = {$inc: { likes: 1 },$inc: { dislikes: -1 }, $push: { usersLiked: "x" }, $pull: { usersDisliked: "x" },  _id: "1234"};
+        const testInitialPost = {
+            _id: "1234",
+            userId: "y", 
+            likes: 0, 
+            dislikes: 1, 
+            usersLiked: [], 
+            usersDisliked: ["x"] 
+        };
+        const testReqPayload = {
+            like: 1,
+            userId: "x"
+        }
+        // act
+        const actual = likeDislikePostLogic(testInitialPost, testReqPayload);
+        // assert
+        expect(actual).toEqual(expected);
+    });
+
+    it("given a user who has NOT created a Post, when he dislikes a Post that he had already likes , then the dislikes prop of the Post is incremented by 1  and the likes prop decremented by 1 and his userId is added and pull from the right arrays", () => {
+        // arrange
+        const expected = {$inc: { likes: -1 },$inc: { dislikes: 1 }, $pull: { usersLiked: "x" }, $push: { usersDisliked: "x" },  _id: "1234"};
+        const testInitialPost = {
+            _id: "1234",
+            userId: "y", 
+            likes: 1, 
+            dislikes: 0, 
+            usersLiked: ["x"], 
+            usersDisliked: [] 
+        };
+        const testReqPayload = {
+            like: -1,
+            userId: "x"
+        }
+        // act
+        const actual = likeDislikePostLogic(testInitialPost, testReqPayload);
+        // assert
+        expect(actual).toEqual(expected);
+    });
+});
