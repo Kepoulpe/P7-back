@@ -87,14 +87,12 @@ describe("test / route", () => {
         testPostId = response.body._id
       })
   });
-  test("given an existing user, when he delete creeted by himself a post without a picture, then it should return a 201 status code and the expected payload", async () => {
+  test("given an existing user, when he delete a post created by himself a post without a picture, then it should return a 201 status code and the expected payload", async () => {
     return request(app)
-      .post("/api/posts:id")
+      .delete("/api/posts:id")
       .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
       .set('Accept', 'application/json')
-      .send({
-        _id: testPostId,
-      })
+      .query({id : testPostId})
       .then(response => {
         expect(response.statusCode).toBe(201);
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
