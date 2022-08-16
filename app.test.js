@@ -70,7 +70,7 @@ describe("test / route", () => {
       })
   });
 
-  test("given an existing user, when he creates a post without a picture, then it should return a 201 status code and the expected payload", async () => {
+  test("given an existing user, when he creates a post without a picture, then it should return a 201 status code and the expected payload", () => {
     return request(app)
       .post("/api/posts")
       .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
@@ -80,43 +80,40 @@ describe("test / route", () => {
         content: "test post"
       })
       .then(response => {
+        testPostId = response.body.data._id
         expect(response.statusCode).toBe(201);
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
         expect(response.body.msg).toStrictEqual("Post créé");
         expect(response.body.success).toBeTruthy();
         expect(response.body.data.content).toStrictEqual("test post");
-        testPostId = response.body._id
       })
   });
-  // test("given an existing user, when he delete a post created by himself a post without a picture, then it should return a 201 status code and the expected payload", async () => {
-  //   return request(app)
-  //     .delete("/api/posts/"+testPostId)
-  //     .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
-  //     .set('Accept', 'application/json')
-  //     .then(response => {
-  //       expect(response.statusCode).toBe(201);
-  //       expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-  //       expect(response.body.msg).toStrictEqual("Post supprimé");
-  //       expect(response.body.success).toBeTruthy();
-  //     })
-  // });
 
-  // test("given an existing user, when he creates a post with a picture, then it should return a 201 status code and the expected payload", async () => {
-  //   return request(app)
-  //     .post("/api/posts")
-  //     .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
-  //     .set('Accept', 'multipart/form-data')
-  //     .attach("post_file", path.resolve(__dirname, "test.png"))
-  //     .then(response => {
-  //       expect(response.statusCode).toBe(201);
-  //       expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-  //       expect(response.body).toStrictEqual({
-  //         data: posts,
-  //         msg: "Post créé",
-  //         success: true
-  //       });
-  //     })
-  // });
+  test("given an existing user, when he deletes a post created by himself a post without a picture, then it should return a 204 status code and the expected payload", async () => {
+    const response = await request(app)
+      .delete("/api/posts/"+testPostId)
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Accept', 'application/json');
+    // expect(response.statusCode).toBe(204);
+  });
+
+  // TODO make sure the file exists when uploaded
+  test("given an existing user, when he creates a post with a picture, then it should return a 201 status code and the expected payload, and the uploaded file should exist on the server", async () => {
+    return request(app)
+      .post("/api/posts")
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Accept', 'multipart/form-data')
+      .field("content", "test content")
+      .field("userId", userLoginResponseBody.userId)
+      .attach("post_file", path.resolve(__dirname, "test.png"))
+      .then(response => {
+        expect(response.statusCode).toBe(201);
+        expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+        expect(response.body.msg).toStrictEqual("Post créé");
+        expect(response.body.success).toBeTruthy();
+        expect(response.body.data.content).toStrictEqual("test content");
+      })
+  });
 
   test('given a user with a fake JWT token, when he creates a post, then it should return a 401 status code and the expected response payload', async () => {
     return request(app)

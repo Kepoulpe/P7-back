@@ -8,6 +8,8 @@ const multer = require('../middleware/multer-config');
 
 // user can create one post in the data base mongoDB
 router.post('/',
+    auth,
+    multer,
     body('content')
         .not()
         .isEmpty()
@@ -21,8 +23,6 @@ router.post('/',
         };
         next()
     },
-    auth,
-    multer,
     postCtrl.createPost
 )
 

@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 // controller for user signup
-
 exports.signup = async (req, res, next) => {
 
     let user;
@@ -17,34 +16,27 @@ exports.signup = async (req, res, next) => {
             isAdmin: req.body.isAdmin ?? false
         });
     } catch (error) {
-        res
-            .status(500)
-            .json({
-                data: null,
-                msg: errors,
-                success: false
-            });
+        res.status(500).json({
+            data: null,
+            msg: errors,
+            success: false
+        });
         return;
     }
 
     try {
         await user.save();
-        res
-            .type("json")
-            .status(201)
-            .json({
-                data: null,
-                msg: 'user created',
-                success: true
-            });
+        res.status(201).json({
+            data: null,
+            msg: 'user created',
+            success: true
+        });
     } catch (error) {
-        res
-            .status(400)
-            .json({
-                data: null,
-                msg: errors,
-                success: false
-            });
+        res.status(400).json({
+            data: null,
+            msg: errors,
+            success: false
+        });
     }
 };
 

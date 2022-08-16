@@ -62,44 +62,94 @@ exports.modifyPost = (req, res, next) => {
                 const filename = sauce.imageUrl.split('/images/')[1];
                 fs.unlink(`images/${filename}`, () => {
                     Post.updateOne({ _id: req.params.id }, { ...postObject, _id: req.params.id })
-                        .then(() => { res.status(200).json({ message: 'Post mis à jour!' }); })
+                        .then(() => res.status(200).json({
+                            data: post,
+                            msg: 'Post mis à jour!',
+                            success: true
+                        }))
                         .catch((error) => { res.status(400).json({ error }); });
                 })
             })
-            .catch((error) => { res.status(500).json({ error }); });
+            .catch(error => res.status(500).json({
+                data: null,
+                msg: errors,
+                success: false
+            }));
 
     } else {
         Post.updateOne({ _id: req.params.id }, { ...postObject, _id: req.params.id })
-            .then(() => res.status(200).json({ message: 'Post mis à jour!' }))
-            .catch((error) => res.status(400).json({ error }));
+            .then(() => res.status(200).json({
+                data: post,
+                msg: 'Post mis à jour!',
+                success: true
+            }))
+            .catch(error => res.status(400).json({
+                data: null,
+                msg: errors,
+                success: false
+            }));
     }
 };
 
 // delete one post on the data base mongoDB
-exports.deletePost = (req, res, next) => {
-    // find the right file and the picture link to this file
-    Post.findOne({ _id: req.params.id })
-        .then(post => {
-            const filename = post.imageUrl.split('/images/')[1];
-            fs.unlink(`images/${filename}`, () => {
-                Post.deleteOne({ _id: req.params.id })
-                    .then(() => res.status(200).json({
-                        data: null,
-                        msg: 'Post supprimé !',
-                        success: true
-                    }))
-                    .catch(error => res.status(400).json({
-                        data: null,
-                        msg: errors,
-                        success: false
-                    }));
-            });
-        })
-        .catch(error => res.status(500).json({
+exports.deletePost = async (req, res, next) => {
+
+    // first we get the request post to delete
+    let post;
+
+    if (!req.params.id) {
+        res.status(400).json({
+            data: null,
+            msg: "no id provided to delete post",
+            success: false
+        });
+    }
+
+    try {
+        post = await Post.findOne({ _id: req.params.id });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
             data: null,
             msg: error,
             success: false
-        }));
+        });
+        return;
+    }
+
+    if (post == null) {
+        res.status(404).json({
+            data: null,
+            msg: "no post found with that id",
+            success: false
+        });
+        return;
+    }
+
+    /**
+     * we check if there is a file associated to the post to delete,
+     * if so we delete the file
+     */
+    const filename = post.imageUrl ? post.imageUrl.split('/images/')[1] : false;
+    if (filename && fs.existsSync(filename)) {
+        fs.unlinkSync(`images/${filename}`);
+    }
+
+    // we actually delete the post
+    try {
+        await Post.deleteOne({ _id: req.params.id });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            data: null,
+            msg: error,
+            success: false
+        });
+        return;
+    }
+
+    // we return the response
+    res.status(204).send('');
 };
 
 // get one sauce in the data base mongoDB 
