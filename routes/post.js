@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { body, validationResult } = require('express-validator');
 
 const postCtrl = require('../controllers/post');
 const auth = require('../middleware/auth');
@@ -7,6 +8,19 @@ const multer = require('../middleware/multer-config');
 
 // user can create one post in the data base mongoDB
 router.post('/',
+    body('content')
+        .not()
+        .isEmpty()
+        .trim()
+        .escape(),
+    (req, res, next) => {
+        // Finds the validation errors in this request and wraps them in an object with handy functions
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() })
+        };
+        next()
+    },
     auth,
     multer,
     postCtrl.createPost
@@ -14,6 +28,19 @@ router.post('/',
 
 // modify one specific post in the data base mongoDB
 router.put('/:id',
+    body('content')
+        .not()
+        .isEmpty()
+        .trim()
+        .escape(),
+    (req, res, next) => {
+        // Finds the validation errors in this request and wraps them in an object with handy functions
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() })
+        };
+        next()
+    },
     auth,
     multer,
     postCtrl.modifyPost

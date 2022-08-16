@@ -21,7 +21,7 @@ exports.createPost = (req, res, next) => {
                 .catch(error => res.status(400).json({
                     data: null,
                     msg: 'Erreur lors de la création du post',
-                    success: true
+                    success: false
                 }));
         } else {
             const post = new Post({
@@ -33,14 +33,45 @@ exports.createPost = (req, res, next) => {
                     msg: "Post créé",
                     success: true
                 }))
-                .catch(error => res.status(400).json({ error }));
+                .catch(error => res.status(400).json({
+                    data: null,
+                    msg: errors,
+                    success: false
+                }));
         }
     } catch (error) {
         res.status(500).json({
             data: null,
             msg: 'Erreur lors de la création du post',
-            success: true
+            success: false
         })
+    }
+};
+
+// modify one post on the data base mongoDB
+exports.modifyPost = (req, res, next) => {
+    // check if user modify the picture
+    const PostObject = req.file ?
+        {
+            ...JSON.parse(req.body.post),
+            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+        } : { ...req.body };
+    if (req.file) {
+        Post.findOne({ _id: req.params.id })
+            .then((post) => {
+                const filename = sauce.imageUrl.split('/images/')[1];
+                fs.unlink(`images/${filename}`, () => {
+                    Post.updateOne({ _id: req.params.id }, { ...postObject, _id: req.params.id })
+                        .then(() => { res.status(200).json({ message: 'Post mis à jour!' }); })
+                        .catch((error) => { res.status(400).json({ error }); });
+                })
+            })
+            .catch((error) => { res.status(500).json({ error }); });
+
+    } else {
+        Post.updateOne({ _id: req.params.id }, { ...postObject, _id: req.params.id })
+            .then(() => res.status(200).json({ message: 'Post mis à jour!' }))
+            .catch((error) => res.status(400).json({ error }));
     }
 };
 
@@ -53,14 +84,29 @@ exports.deletePost = (req, res, next) => {
             fs.unlink(`images/${filename}`, () => {
                 Post.deleteOne({ _id: req.params.id })
                     .then(() => res.status(200).json({
-                        data : null, 
+                        data: null,
                         msg: 'Post supprimé !',
                         success: true
-                     }))
-                    .catch(error => res.status(400).json({ error }));
+                    }))
+                    .catch(error => res.status(400).json({
+                        data: null,
+                        msg: errors,
+                        success: false
+                    }));
             });
         })
-        .catch(error => res.status(500).json({ error }));
+        .catch(error => res.status(500).json({
+            data: null,
+            msg: error,
+            success: false
+        }));
+};
+
+// get one sauce in the data base mongoDB 
+exports.getOnePost = (req, res, next) => {
+    Post.findOne({ _id: req.params.id })
+        .then(sauce => res.status(200).json(sauce))
+        .catch(error => res.status(404).json({ error }));
 };
 
 // get all the posts in the data base mongoDB
@@ -75,13 +121,13 @@ exports.getAllPosts = (req, res, next) => {
             .catch(error => res.status(404).json({
                 data: null,
                 msg: 'Pas de posts à afficher',
-                success: true
+                success: false
             }))
     } catch (error) {
         res.status(500).json({
             data: null,
-            msg: 'Erreur veuillez réessayer ultérieurement',
-            success: true
+            msg: 'Une erreur est servenue',
+            success: false
         });
     }
 };
@@ -93,18 +139,18 @@ exports.likeDislikePost = async (req, res, next) => {
 
     // 1) we check if the Post to update exists
     try {
-        postRecord = await Post.findOne({_id: req.params.id});
+        postRecord = await Post.findOne({ _id: req.params.id });
     } catch (error) {
         res.status(404).json({
             data: null,
             msg: 'Post non trouvé',
-            success: true
+            success: false
         });
         return;
     }
 
     // 2) we create a formatted object from the post obtained in MongoDB from previous step
-    const {userId, likes, dislikes, usersLiked, usersDisliked} = postRecord;
+    const { userId, likes, dislikes, usersLiked, usersDisliked } = postRecord;
     postRecord._id = req.params.id;
 
     // 3) we get the payload that we will use to actually update like/dislike data with MongoDB
@@ -112,7 +158,11 @@ exports.likeDislikePost = async (req, res, next) => {
 
     // 3bis) send appropriate response if updateLikeDislikeObj is false (user tried to update likes data on his own post)
     if (!updateLikeDislikeObj) {
-        res.status(403).json({error: `Cannot update post like/dislike data`});
+        res.status(403).json({
+            data: null,
+            msg: "Can not update like/dislike posts",
+            success: false
+        });
         return;
     }
 
@@ -121,9 +171,17 @@ exports.likeDislikePost = async (req, res, next) => {
     try {
         console.log(updateLikeDislikeObj);
         await Post.updateOne({ _id: postRecord._id }, updateLikeDislikeObj);
-        res.status(200).json({error: `Updated post like/dislike data`});
+        res.status(200).json({
+            data: posts,
+            msg: "like/dislike posts updated",
+            success: true
+        });
     } catch (error) {
-        res.status(500).json({error: `Could not update post like/dislike data, please try again later`});
+        res.status(500).json({
+            data: posts,
+            msg: "like/dislike posts not updated",
+            success: false
+        });
     }
 
 }
