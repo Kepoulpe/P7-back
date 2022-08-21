@@ -96,7 +96,7 @@ exports.deletePost = async (req, res, next) => {
 
     // first we get the request post to delete
     let post;
-
+    // is it necessary ?
     if (!req.params.id) {
         res.status(400).json({
             data: null,

@@ -3,7 +3,7 @@ const app = require('./app');
 const mongoose = require("mongoose");
 const user = require("./models/user");
 const jwt = require("jsonwebtoken");
-const path  = require("path")
+const path = require("path")
 
 let userLoginResponseBody;
 
@@ -89,16 +89,45 @@ describe("test / route", () => {
       })
   });
 
+  test("given an existing user, when he modify a post without a picture, then it should return a 200 status code and the expected payload", () => {
+    return request(app)
+      .put("/api/posts/" + testPostId)
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Accept', 'application/json')
+      .send({
+        userId: userLoginResponseBody.userId,
+        content: "test post test"
+      })
+      .then(response => {
+        expect(response.statusCode).toBe(200);
+        expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+        expect(response.body.msg).toStrictEqual("Post créé");
+        expect(response.body.success).toBeTruthy();
+        expect(response.body.data.content).toStrictEqual("test post test");
+      })
+  });
+
+  test("given an existing user, when he deletes a post not created by himself a post without a picture, then it should return a 400 status code", async () => {
+    const response = await request(app)
+      .delete("/api/posts/" + testPostId)
+      .set('Authorization', 'Bearer ' + '5263562536342&se846')
+      .set('Accept', 'application/json')
+      .then(response => {
+        expect(response.statusCode).toBe(401);
+      })
+  });
   test("given an existing user, when he deletes a post created by himself a post without a picture, then it should return a 204 status code and the expected payload", async () => {
     const response = await request(app)
-      .delete("/api/posts/"+testPostId)
+      .delete("/api/posts/" + testPostId)
       .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
-      .set('Accept', 'application/json');
-    // expect(response.statusCode).toBe(204);
+      .set('Accept', 'application/json')
+      .then(response => {
+        expect(response.statusCode).toBe(204);
+      })
   });
 
   // TODO make sure the file exists when uploaded
-  test("given an existing user, when he creates a post with a picture, then it should return a 201 status code and the expected payload, and the uploaded file should exist on the server", async () => {
+  test("given an existing user, when he creates a post with a picture, then it should return a 201 status code and the expected payload, and the uploaded file should exist on the server", () => {
     return request(app)
       .post("/api/posts")
       .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
@@ -112,10 +141,21 @@ describe("test / route", () => {
         expect(response.body.msg).toStrictEqual("Post créé");
         expect(response.body.success).toBeTruthy();
         expect(response.body.data.content).toStrictEqual("test content");
+        testPostIdWithPic = response.body.data._id
       })
   });
 
-  test('given a user with a fake JWT token, when he creates a post, then it should return a 401 status code and the expected response payload', async () => {
+  test("given an existing user, when he deletes a post created by himself a post with a picture, then it should return a 204 status code and the expected payload", async () => {
+    const response = await request(app)
+      .delete("/api/posts/" + testPostIdWithPic)
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Accept', 'application/json')
+      .then(response => {
+        expect(response.statusCode).toBe(204);
+      })
+  });
+
+  test('given a user with a fake JWT token, when he creates a post, then it should return a 401 status code and the expected response payload', () => {
     return request(app)
       .post("/api/posts")
       .set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3ODkwIiwiY29udGVudCI6IllPTE8gSSdtIGEgaGFja2VyIn0.mNt9fPfJ3OGVg2fpRkDdzBCm7J_M-ZeOPwP4Rd9Lxmw')
@@ -135,7 +175,7 @@ describe("test / route", () => {
       });
   });
 
-  test("creating test post for get all posts test", async () => {
+  test("creating test post for get all posts test", () => {
     return request(app)
       .post("/api/posts")
       .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
@@ -155,7 +195,7 @@ describe("test / route", () => {
       })
   });
 
-  test("creating test post for get all posts test", async () => {
+  test("creating test post for get all posts test", () => {
     return request(app)
       .post("/api/posts")
       .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
