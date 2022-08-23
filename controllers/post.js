@@ -1,9 +1,9 @@
 const Post = require('../models/post');
 const fs = require('fs');
+const { log } = require('console');
 
 // user can create one post in the database mongoDb
 exports.createPost = (req, res, next) => {
-    // TODO DRY
     try {
         const postObj = req.body;
         delete postObj._id;
@@ -64,10 +64,14 @@ exports.modifyPost = (req, res, next) => {
                     Post.updateOne({ _id: req.params.id }, { ...postObject, _id: req.params.id })
                         .then(() => res.status(200).json({
                             data: post,
-                            msg: 'Post mis à jour!',
+                            msg: 'Post mis à jour',
                             success: true
                         }))
-                        .catch((error) => { res.status(400).json({ error }); });
+                        .catch(error => res.status(400).json({
+                            data: null,
+                            msg: errors,
+                            success: false
+                        }));
                 })
             })
             .catch(error => res.status(500).json({
@@ -80,7 +84,7 @@ exports.modifyPost = (req, res, next) => {
         Post.updateOne({ _id: req.params.id }, { ...postObject, _id: req.params.id })
             .then(() => res.status(200).json({
                 data: post,
-                msg: 'Post mis à jour!',
+                msg: 'Post mis à jour',
                 success: true
             }))
             .catch(error => res.status(400).json({
@@ -152,11 +156,20 @@ exports.deletePost = async (req, res, next) => {
     res.status(204).send('');
 };
 
-// get one sauce in the data base mongoDB 
+// get one post in the data base mongoDB 
 exports.getOnePost = (req, res, next) => {
     Post.findOne({ _id: req.params.id })
-        .then(sauce => res.status(200).json(sauce))
-        .catch(error => res.status(404).json({ error }));
+        .then(post => res.status(200).json({
+            data: post,
+            msg: "post fetched",
+            success: true
+        }))
+        .catch(error => 
+            res.status(404).json({
+            data: null,
+            msg: error,
+            success: false
+        }))
 };
 
 // get all the posts in the data base mongoDB
@@ -168,7 +181,8 @@ exports.getAllPosts = (req, res, next) => {
                 msg: "posts fetched",
                 success: true
             }))
-            .catch(error => res.status(404).json({
+            .catch(error=> 
+                res.status(404).json({
                 data: null,
                 msg: 'Pas de posts à afficher',
                 success: false

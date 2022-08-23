@@ -89,21 +89,36 @@ describe("test / route", () => {
       })
   });
 
-  test("given an existing user, when he modify a post without a picture, then it should return a 200 status code and the expected payload", () => {
-    return request(app)
+  // test("given an existing user, when he modify a post without a picture, then it should return a 200 status code and the expected payload", () => {
+  //   return request(app)
+  //     .put("/api/posts/" + testPostId)
+  //     .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+  //     .set('Accept', 'application/json')
+  //     .send({
+  //       userId: userLoginResponseBody.userId,
+  //       content: "test post modify"
+  //     })
+  //     .then(response => {
+  //       console.log(response.error);
+  //       expect(response.statusCode).toBe(200);
+  //       expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+  //       expect(response.body.msg).toStrictEqual("Post mis à jour");
+  //       expect(response.body.success).toBeTruthy();
+  //       expect(response.body.data.content).toStrictEqual("test post modify");
+  //     })
+  // });
+
+  test("given an existing user, when he try to modify a post not created by himself a post without a picture, then it should return a 401 status code", async () => {
+    const response = await request(app)
       .put("/api/posts/" + testPostId)
-      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Authorization', 'Bearer ' + '5263562536342&se846')
       .set('Accept', 'application/json')
       .send({
         userId: userLoginResponseBody.userId,
-        content: "test post test"
+        content: "test modify"
       })
       .then(response => {
-        expect(response.statusCode).toBe(200);
-        expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-        expect(response.body.msg).toStrictEqual("Post créé");
-        expect(response.body.success).toBeTruthy();
-        expect(response.body.data.content).toStrictEqual("test post test");
+        expect(response.statusCode).toBe(401);
       })
   });
 
@@ -116,6 +131,7 @@ describe("test / route", () => {
         expect(response.statusCode).toBe(401);
       })
   });
+
   test("given an existing user, when he deletes a post created by himself a post without a picture, then it should return a 204 status code and the expected payload", async () => {
     const response = await request(app)
       .delete("/api/posts/" + testPostId)
@@ -190,8 +206,7 @@ describe("test / route", () => {
         expect(response.body.msg).toStrictEqual("Post créé");
         expect(response.body.success).toBeTruthy();
         expect(response.body.data.content).toStrictEqual("test post1");
-        postIdtest1 = response.body._id
-        postTestContent1 = response.body.content
+        postTestData1 = response.body.data
       })
   });
 
@@ -210,45 +225,101 @@ describe("test / route", () => {
         expect(response.body.msg).toStrictEqual("Post créé");
         expect(response.body.success).toBeTruthy();
         expect(response.body.data.content).toStrictEqual("test post2");
-        postIdtest2 = response.body._id
-        postTestContent2 = response.body.content
+        postTestData2 = response.body.data
       })
   });
 
-  // test("given an existing user, when he open lobby page, then it should return a 200 status code an object with all the posts", async () => {
-  //   // TODO create 2 posts beforehand
+  test("given an existing user, when he open lobby page, then it should return a 200 status code an object with all the posts", () => {
+    // TODO define what the expected response should be
+    const expected = {
+      data: [
+        {
+          __v: postTestData1.__v,
+          _id: postTestData1._id,
+          content: postTestData1.content,
+          dislikes: postTestData1.dislikes,
+          likes: postTestData1.likes,
+          userId: postTestData1.userId,
+          usersDisliked: postTestData1.usersDisliked,
+          usersLiked: postTestData1.usersLiked
+        },
+        {
+          __v: postTestData2.__v,
+          _id: postTestData2._id,
+          content: postTestData2.content,
+          dislikes: postTestData2.dislikes,
+          likes: postTestData2.likes,
+          userId: postTestData2.userId,
+          usersDisliked: postTestData2.usersDisliked,
+          usersLiked: postTestData2.usersLiked
+        }
+      ],
+      msg: "posts fetched",
+      success: true
+    }
+    return request(app)
+      .get("/api/posts")
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Accept', 'application/json')
+      .then(response => {
+        expect(response.statusCode).toBe(200);
+        expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+        expect(response.body).toStrictEqual(expected);
+      })
+    // TODO here or later or in the after each method => delete the created posts
+  });
 
-  //   // TODO get the ids of the posts created
 
-  //   // TODO define what the expected response should be
-  //   const expected = {
-  //     data: [
-  //       {
-  //         _id: postIdtest1,
-  //         // other fields
-  //         content: postTestContent1
-  //       },
-  //       {
-  //         _id: postIdtest2,
-  //         // other fields
-  //         content : postTestContent2
-  //       }
-  //     ],
-  //     msg: "posts fetched",
-  //     success: true
-  //   }
-  //   return request(app)
-  //     .get("/api/posts")
-  //     .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
-  //     .set('Accept', 'application/json')
-  //     .then(response => {
-  //       expect(response.statusCode).toBe(200);
-  //       expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-  //       expect(response.body).toStrictEqual(expected);
-  //     })
-  //   // TODO here or later or in the after each method => delete the created posts
-  // });
+  test("deleting the first test post created for get all posts test", async () => {
+    const response = await request(app)
+      .delete("/api/posts/" + postTestData1._id)
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Accept', 'application/json')
+      .then(response => {
+        expect(response.statusCode).toBe(204);
+      })
+  });
 
+
+  test("given an existing user, when he open a specific post, then it should return a 200 status code an object with the specific post", () => {
+    // TODO define what the expected response should be
+    const expected = {
+      data:
+      {
+        __v: postTestData2.__v,
+        _id: postTestData2._id,
+        content: postTestData2.content,
+        dislikes: postTestData2.dislikes,
+        likes: postTestData2.likes,
+        userId: postTestData2.userId,
+        usersDisliked: postTestData2.usersDisliked,
+        usersLiked: postTestData2.usersLiked,
+      },
+      msg: "post fetched",
+      success: true
+    }
+    return request(app)
+      .get("/api/posts/" + postTestData2._id)
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Accept', 'application/json')
+      .then(response => {
+        expect(response.statusCode).toBe(200);
+        expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+        expect(response.body).toStrictEqual(expected);
+      })
+  });
+  // testing the like/dislike route
+
+
+  test("deleting the second test post created for get all posts , get one post and like/dislike route", async () => {
+    const response = await request(app)
+      .delete("/api/posts/" + postTestData2._id)
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Accept', 'application/json')
+      .then(response => {
+        expect(response.statusCode).toBe(204);
+      })
+  });
 
   test("given an existing user, when he sends a request to delete his account, then it should return a 200 status code and payload {msg: 'Utilisateur supprimé'}", async () => {
     return request(app)
