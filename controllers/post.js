@@ -51,7 +51,7 @@ exports.createPost = (req, res, next) => {
 // modify one post on the data base mongoDB
 exports.modifyPost = (req, res, next) => {
     // check if user modify the picture
-    const PostObject = req.file ?
+    const postObject = req.file ?
         {
             ...JSON.parse(req.body.post),
             imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
@@ -69,29 +69,32 @@ exports.modifyPost = (req, res, next) => {
                         }))
                         .catch(error => res.status(400).json({
                             data: null,
-                            msg: errors,
+                            msg: error,
                             success: false
                         }));
                 })
             })
             .catch(error => res.status(500).json({
                 data: null,
-                msg: errors,
+                msg: error,
                 success: false
             }));
 
     } else {
         Post.updateOne({ _id: req.params.id }, { ...postObject, _id: req.params.id })
             .then(() => res.status(200).json({
-                data: post,
+                data: null,
                 msg: 'Post mis à jour',
                 success: true
             }))
-            .catch(error => res.status(400).json({
-                data: null,
-                msg: errors,
-                success: false
-            }));
+            .catch(error => {
+                // console.error(error);
+                res.status(400).json({
+                    data: null,
+                    msg: error,
+                    success: false
+                })
+            });
     }
 };
 

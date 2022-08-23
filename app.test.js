@@ -3,25 +3,49 @@ const app = require('./app');
 const mongoose = require("mongoose");
 const user = require("./models/user");
 const jwt = require("jsonwebtoken");
-const path = require("path")
+const path = require("path");
+const bcrypt = require('bcrypt');
+
+const User = require('./models/user');
 
 let userLoginResponseBody;
+let adminUserId;
 
-beforeAll(async () => {
-  try {
+beforeAll(() => {
     mongoose.connect(process.env.MONGODB_TEST_CONNECTION_STRING, {
       useNewUrlParser: true,
       useUnifiedTopology: true
-    });
-    console.log('connected to test db success');
-  } catch (error) {
-    console.log(error);
-    console.error('connected to test db error');
-  }
+    })
+      .then(() => {
+        console.log('connected to test db success, creating admin user...');
+        const hash = bcrypt.hash("ADMIN_PASSWORD", 10)
+          .then(h => {
+            const user = new User({
+              email: "admin@groupomania.com",
+              userName: "admin",
+              password: h,
+              isAdmin: true
+            });
+            user.save()
+              .then(usr => {
+                adminUserId = usr._id;
+              });
+          });
+      })
+      .catch(error => {
+          console.log(error);
+          console.error('connected to test db error');
+      });
 });
 
 afterAll((done) => {
-  mongoose.disconnect(done);
+  User.deleteOne({ _id: adminUserId })
+    .then(() => {
+      mongoose.disconnect(done);
+    })
+    .catch(error => {
+      console.error(error);
+    });
 });
 
 // test suite for routes
@@ -44,11 +68,12 @@ describe("test / route", () => {
         expect(response.body).toStrictEqual({ msg: 'it works', data: null });
       });
   });
+
   // test user signup route
   test("given a visitor, when he creates an account with correct inputs, then it should return 201 status code and {msg : 'user created'}", () => {
     return request(app)
       .post("/api/auth/signup")
-      .send({ email: 'moreno.n@hotmail.fr', userName: 'Nicolas', password: "#Ni58695o", isAdmin: true })
+      .send({ email: 'moreno.n@hotmail.fr', userName: 'Nicolas', password: "#Ni58695o"})
       .set('Accept', 'application/json')
       .then(response => {
         expect(response.statusCode).toBe(201);
@@ -56,19 +81,21 @@ describe("test / route", () => {
         expect(response.body.msg).toStrictEqual('user created');
       })
   });
-  // test user login route
-  test("given an admin user, when he logs in with correct inputs, then it should return a 200 status code and response body `isAdmin` should be true", () => {
+
+  // test visitor user login route
+  test("given a visitor user, when he logs in with correct inputs, then it should return a 200 status code and response body `isAdmin` should be true", () => {
     return request(app)
       .post("/api/auth/login")
-      .send({ email: 'moreno.n@hotmail.fr', password: "#Ni58695o" })
+      .send({ email: 'moreno.n@hotmail.fr', password: "#Ni58695o"})
       .set('Accept', 'application/json')
       .then(response => {
         expect(response.statusCode).toBe(200);
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-        expect(response.body.isAdmin).toBe(true);
         userLoginResponseBody = response.body;
       })
   });
+
+  // TODO same test for admin
 
   test("given an existing user, when he creates a post without a picture, then it should return a 201 status code and the expected payload", () => {
     return request(app)
@@ -80,6 +107,7 @@ describe("test / route", () => {
         content: "test post"
       })
       .then(response => {
+        console.log(response.body)
         testPostId = response.body.data._id
         expect(response.statusCode).toBe(201);
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
@@ -89,24 +117,23 @@ describe("test / route", () => {
       })
   });
 
-  // test("given an existing user, when he modify a post without a picture, then it should return a 200 status code and the expected payload", () => {
-  //   return request(app)
-  //     .put("/api/posts/" + testPostId)
-  //     .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
-  //     .set('Accept', 'application/json')
-  //     .send({
-  //       userId: userLoginResponseBody.userId,
-  //       content: "test post modify"
-  //     })
-  //     .then(response => {
-  //       console.log(response.error);
-  //       expect(response.statusCode).toBe(200);
-  //       expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-  //       expect(response.body.msg).toStrictEqual("Post mis à jour");
-  //       expect(response.body.success).toBeTruthy();
-  //       expect(response.body.data.content).toStrictEqual("test post modify");
-  //     })
-  // });
+  test("given an existing user, when he modifies a post without a picture in the payload, then it should return a 200 status code and the expected payload", () => {
+    return request(app)
+      .put("/api/posts/" + testPostId)
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Accept', 'application/json')
+      .send({
+        userId: userLoginResponseBody.userId,
+        content: "test post modify"
+      })
+      .then(response => {
+        expect(response.statusCode).toBe(200);
+        expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+        expect(response.body.msg).toStrictEqual("Post mis à jour");
+        expect(response.body.success).toBeTruthy();
+        expect(response.body.data).toBeNull()
+      })
+  });
 
   test("given an existing user, when he try to modify a post not created by himself a post without a picture, then it should return a 401 status code", async () => {
     const response = await request(app)

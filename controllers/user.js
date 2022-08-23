@@ -18,7 +18,7 @@ exports.signup = async (req, res, next) => {
     } catch (error) {
         res.status(500).json({
             data: null,
-            msg: errors,
+            msg: error,
             success: false
         });
         return;
@@ -32,9 +32,10 @@ exports.signup = async (req, res, next) => {
             success: true
         });
     } catch (error) {
+        console.error(error);
         res.status(400).json({
             data: null,
-            msg: errors,
+            msg: error,
             success: false
         });
     }
