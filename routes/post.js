@@ -45,6 +45,7 @@ router.put('/:id',
             multer,
             postCtrl.modifyPost,
 );
+
 // user can delete one post in the data base mongoDB
 router.delete('/:id',
     auth,

@@ -9,43 +9,23 @@ const bcrypt = require('bcrypt');
 const User = require('./models/user');
 
 let userLoginResponseBody;
-let adminUserId;
 
 beforeAll(() => {
-    mongoose.connect(process.env.MONGODB_TEST_CONNECTION_STRING, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
+  mongoose.connect(process.env.MONGODB_TEST_CONNECTION_STRING, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+    .then(() => {
+      console.log('connected to test db success');
     })
-      .then(() => {
-        console.log('connected to test db success, creating admin user...');
-        const hash = bcrypt.hash("ADMIN_PASSWORD", 10)
-          .then(h => {
-            const user = new User({
-              email: "admin@groupomania.com",
-              userName: "admin",
-              password: h,
-              isAdmin: true
-            });
-            user.save()
-              .then(usr => {
-                adminUserId = usr._id;
-              });
-          });
-      })
-      .catch(error => {
-          console.log(error);
-          console.error('connected to test db error');
-      });
+    .catch(error => {
+      console.log(error);
+      console.error('connected to test db error');
+    });
 });
 
 afterAll((done) => {
-  User.deleteOne({ _id: adminUserId })
-    .then(() => {
-      mongoose.disconnect(done);
-    })
-    .catch(error => {
-      console.error(error);
-    });
+  mongoose.disconnect(done);
 });
 
 // test suite for routes
@@ -73,7 +53,7 @@ describe("test / route", () => {
   test("given a visitor, when he creates an account with correct inputs, then it should return 201 status code and {msg : 'user created'}", () => {
     return request(app)
       .post("/api/auth/signup")
-      .send({ email: 'moreno.n@hotmail.fr', userName: 'Nicolas', password: "#Ni58695o"})
+      .send({ email: 'moreno.n@hotmail.fr', userName: 'Nicolas', password: "#Ni58695o" })
       .set('Accept', 'application/json')
       .then(response => {
         expect(response.statusCode).toBe(201);
@@ -83,10 +63,10 @@ describe("test / route", () => {
   });
 
   // test visitor user login route
-  test("given a visitor user, when he logs in with correct inputs, then it should return a 200 status code and response body `isAdmin` should be true", () => {
+  test("given a visitor user, when he logs in with correct inputs, then it should return a 200 status code", () => {
     return request(app)
       .post("/api/auth/login")
-      .send({ email: 'moreno.n@hotmail.fr', password: "#Ni58695o"})
+      .send({ email: 'moreno.n@hotmail.fr', password: "#Ni58695o" })
       .set('Accept', 'application/json')
       .then(response => {
         expect(response.statusCode).toBe(200);
@@ -95,8 +75,7 @@ describe("test / route", () => {
       })
   });
 
-  // TODO same test for admin
-
+  // test for post route
   test("given an existing user, when he creates a post without a picture, then it should return a 201 status code and the expected payload", () => {
     return request(app)
       .post("/api/posts")
@@ -107,7 +86,6 @@ describe("test / route", () => {
         content: "test post"
       })
       .then(response => {
-        console.log(response.body)
         testPostId = response.body.data._id
         expect(response.statusCode).toBe(201);
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
@@ -117,6 +95,7 @@ describe("test / route", () => {
       })
   });
 
+  // test for put route  
   test("given an existing user, when he modifies a post without a picture in the payload, then it should return a 200 status code and the expected payload", () => {
     return request(app)
       .put("/api/posts/" + testPostId)
@@ -135,7 +114,7 @@ describe("test / route", () => {
       })
   });
 
-  test("given an existing user, when he try to modify a post not created by himself a post without a picture, then it should return a 401 status code", async () => {
+  test("given an existing user, when he try to modify a post without a picture not created by himself, then it should return a 401 status code", async () => {
     const response = await request(app)
       .put("/api/posts/" + testPostId)
       .set('Authorization', 'Bearer ' + '5263562536342&se846')
@@ -149,7 +128,8 @@ describe("test / route", () => {
       })
   });
 
-  test("given an existing user, when he deletes a post not created by himself a post without a picture, then it should return a 400 status code", async () => {
+  // test for delete route
+  test("given an existing user, when he deletes a post not created by himself a post without a picture, then it should return a 401 status code", async () => {
     const response = await request(app)
       .delete("/api/posts/" + testPostId)
       .set('Authorization', 'Bearer ' + '5263562536342&se846')
@@ -257,7 +237,7 @@ describe("test / route", () => {
   });
 
   test("given an existing user, when he open lobby page, then it should return a 200 status code an object with all the posts", () => {
-    // TODO define what the expected response should be
+    // define what the expected response should be
     const expected = {
       data: [
         {
@@ -293,7 +273,6 @@ describe("test / route", () => {
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
         expect(response.body).toStrictEqual(expected);
       })
-    // TODO here or later or in the after each method => delete the created posts
   });
 
 
@@ -308,8 +287,8 @@ describe("test / route", () => {
   });
 
 
-  test("given an existing user, when he open a specific post, then it should return a 200 status code an object with the specific post", () => {
-    // TODO define what the expected response should be
+  test("given an existing user, when he open a specific post, then it should return a 200 status code and an object with the specific post", () => {
+    // define what the expected response should be
     const expected = {
       data:
       {
@@ -335,8 +314,6 @@ describe("test / route", () => {
         expect(response.body).toStrictEqual(expected);
       })
   });
-  // testing the like/dislike route
-
 
   test("deleting the second test post created for get all posts , get one post and like/dislike route", async () => {
     const response = await request(app)
