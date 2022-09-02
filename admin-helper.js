@@ -3,10 +3,10 @@ const User = require('./models/user');
 
 const createAdminUser = async () => {
     try {
-        const hash = await bcrypt.hash("ADMIN_PASSWORD", 10);
+        const hash = await bcrypt.hash(process.env.PASSWORD_ADMIN_USER, 10);
         const user = new User({
-            email: "admin@groupomania.com",
-            userName: "admin",
+            email: process.env.EMAIL_ADMIN_USER,
+            userName: process.env.USERNAME_ADMIN_USER,
             password: hash,
             isAdmin: true
         });
