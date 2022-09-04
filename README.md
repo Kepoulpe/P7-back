@@ -27,7 +27,7 @@ Server should be start on port 3000 make sure you're prt is free to use
 *6- Quality Assurance CURL COMMANDS*
  
 - ⚠️ we create the admin user on app' startup for the sake of evaluation, please delete that user from DB if you relaunch the app'
-- log admin user in : `curl -H "Content-Type: application/json" -X POST -d '{"email":"admin@groupomania.com","password":"ADMIN_PASSWORD"}' http://localhost:3001/api/auth/login`
+- log admin user in : `curl -H "Content-Type: application/json" -X POST -d '{"email":"admin@groupomania.com","password":"ADMIN_password2"}' http://localhost:3001/api/auth/login`
 - sign regular user up: `curl -H "Content-Type: application/json" -X POST -d '{"email":"test@test.com","password":"2TEST_test", "userName": "test"}' http://localhost:3001/api/auth/signup`
 - sign regular a 2nd user up: `curl -H "Content-Type: application/json" -X POST -d '{"email":"test2@test.com","password":"2TEST_test", "userName": "test"}' http://localhost:3001/api/auth/signup`  
 - log regular user in : `curl -H "Content-Type: application/json" -X POST -d '{"email":"test@test.com","password":"2TEST_test"}' http://localhost:3001/api/auth/login`
@@ -38,3 +38,13 @@ Server should be start on port 3000 make sure you're prt is free to use
 - delete a post: `curl -X DELETE -H "Content-Type: application/json" -H "Authorization: Bearer {token}" http://localhost:3001/api/posts/{POST_ID}`
 <!-- TODO add commands for likes/dislikes -->
 - like a post : `curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer {token}" -d '{"1"}' http://localhost:3001/api/posts/{POST_ID}/like`
+
+6314c8b41ec6a92121658f02
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MzE0YzhiNDFlYzZhOTIxMjE2NThmMDIiLCJpYXQiOjE2NjIzMDY1MjYsImV4cCI6MTY2MjM5MjkyNn0.POSCyAYsEnedNYDe5_NrpBe4_t85JwYNV_DWkJE_lKE
+
+curl -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MzE0YzhiNDFlYzZhOTIxMjE2NThmMDIiLCJpYXQiOjE2NjIzMDY1MjYsImV4cCI6MTY2MjM5MjkyNn0.POSCyAYsEnedNYDe5_NrpBe4_t85JwYNV_DWkJE_lKE" -d '{"content": "test", "userId": "6314c8b41ec6a92121658f02"}' http://localhost:3001/api/posts
+
+6314c9261ec6a92121658f0b
+
+curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MzE0YzhiNDFlYzZhOTIxMjE2NThmMDIiLCJpYXQiOjE2NjIzMDY1MjYsImV4cCI6MTY2MjM5MjkyNn0.POSCyAYsEnedNYDe5_NrpBe4_t85JwYNV_DWkJE_lKE" -d '{"like":1, "userId":"6314c8b41ec6a92121658f02" }' http://localhost:3001/api/posts/6314c9261ec6a92121658f0b/like

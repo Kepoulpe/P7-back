@@ -13,7 +13,7 @@
  exports.likeDislikeLogic = (formattedLikeObj, reqPayload) => {
     const like = reqPayload.like;
     // this if block is for the case the user who has created a sauce tries to update its like data
-    // this other if bloc is for the case a user tries to like/dislike a sauce twice
+    // this other block is for the case a user tries to like/dislike a sauce twice
     if (
         // formattedLikeObj.userId == reqPayload.userId ||
         like === 1 && formattedLikeObj.usersLiked.includes(reqPayload.userId)

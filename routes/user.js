@@ -37,5 +37,13 @@ router.post(
 
 router.post('/delete', auth, usersCtlr.delete);
 
+router.get(
+    '/',
+    auth,
+    (req, res) => {
+        res.status(200).json({ msg : "Auth is valid" })
+    }
+)
+
 
 module.exports = router;

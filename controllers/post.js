@@ -1,6 +1,6 @@
 const Post = require('../models/post');
 const fs = require('fs');
-const { log } = require('console');
+const { likeDislikeLogic } = require('./likeDislike');
 
 // user can create one post in the database mongoDb
 exports.createPost = (req, res, next) => {
@@ -221,7 +221,7 @@ exports.likeDislikePost = async (req, res, next) => {
     postRecord._id = req.params.id;
 
     // 3) we get the payload that we will use to actually update like/dislike data with MongoDB
-    const updateLikeDislikeObj = likeDislikePost(postRecord, req.body);
+    const updateLikeDislikeObj = likeDislikeLogic(postRecord, req.body);
 
     // 3bis) send appropriate response if updateLikeDislikeObj is false (user tried to update likes data on his own post)
     if (!updateLikeDislikeObj) {
@@ -239,13 +239,13 @@ exports.likeDislikePost = async (req, res, next) => {
         console.log(updateLikeDislikeObj);
         await Post.updateOne({ _id: postRecord._id }, updateLikeDislikeObj);
         res.status(200).json({
-            data: posts,
+            data: postRecord,
             msg: "like/dislike posts updated",
             success: true
         });
     } catch (error) {
         res.status(500).json({
-            data: posts,
+            data: postRecord,
             msg: "like/dislike posts not updated",
             success: false
         });
