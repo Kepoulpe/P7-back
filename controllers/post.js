@@ -35,7 +35,7 @@ exports.createPost = (req, res, next) => {
                 }))
                 .catch(error => res.status(400).json({
                     data: null,
-                    msg: errors,
+                    msg: error,
                     success: false
                 }));
         }

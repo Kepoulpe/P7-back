@@ -18,7 +18,7 @@ or *RUN THE BACKEND SERVER NORMAL (without auto reaload for dev)*
 
 - `npm run start`
 
-Server should be start on port 3000 make sure you're prt is free to use
+Server should be start on port 3001 make sure you're port is free to use
 
 *5- TEST ARE ALL INDEPENDANT (you don't need to run the server to test the app and it use a different database for test)*
 
@@ -37,7 +37,7 @@ Server should be start on port 3000 make sure you're prt is free to use
 - update a post: `curl -X PUT -H "Content-Type: application/json" -H "Authorization: Bearer {token}" -d '{"content": "test update", "userId": "{MONGO_UID}"}' http://localhost:3001/api/posts/{POST_ID}`
 - delete a post: `curl -X DELETE -H "Content-Type: application/json" -H "Authorization: Bearer {token}" http://localhost:3001/api/posts/{POST_ID}`
 <!-- TODO add commands for likes/dislikes -->
-- like a post : `curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer {token}" -d '{"1"}' http://localhost:3001/api/posts/{POST_ID}/like`
+- like a post : `curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer {token}" -d '{"like":1, "userId": "{MONGO_UID}"}' http://localhost:3001/api/posts/{POST_ID}/like`
 
 6314c8b41ec6a92121658f02
 
