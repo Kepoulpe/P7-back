@@ -61,7 +61,7 @@ exports.login = async (req, res, next) => {
             success: false
         });
         return;
-    } 
+    }
     let isPwdValid;
     try {
         isPwdValid = await bcrypt.compare(req.body.password, usr.password);
@@ -71,7 +71,7 @@ exports.login = async (req, res, next) => {
             msg: 'Une erreur est servenue, merci de réessayer ultérieument',
             success: false
         });
-        return;        
+        return;
     }
     if (!isPwdValid) {
         res.status(401).json({
@@ -94,6 +94,23 @@ exports.login = async (req, res, next) => {
         msg: 'login successful',
         success: true
     });
+};
+
+// get one user
+exports.getOneUser = (req, res, next) => {
+    let user;
+    User.findbyId({ _id: req.params.id })
+        .then(user => res.status(200).json({
+            data: user,
+            msg: "user fetched",
+            success: true
+        }))
+        .catch(error =>
+            res.status(404).json({
+                data: null,
+                msg: error,
+                success: false
+            }))
 };
 
 exports.delete = async (req, res) => {

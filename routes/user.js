@@ -45,5 +45,11 @@ router.get(
     }
 )
 
+router.get(
+    '/:id',
+    auth,
+    usersCtlr.getOneUser
+)
+
 
 module.exports = router;

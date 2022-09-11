@@ -149,7 +149,7 @@ describe("test / route", () => {
       })
   });
 
-  // TODO make sure the file exists when uploaded
+ 
   test("given an existing user, when he creates a post with a picture, then it should return a 201 status code and the expected payload, and the uploaded file should exist on the server", () => {
     return request(app)
       .post("/api/posts")
