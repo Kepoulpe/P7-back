@@ -157,7 +157,7 @@ describe("test / route", () => {
       .set('Accept', 'multipart/form-data')
       .field("content", "test content")
       .field("userId", userLoginResponseBody.userId)
-      .attach("post_file", path.resolve(__dirname, "test.png"))
+      .attach("imageUrl", path.resolve(__dirname, "test.png"))
       .then(response => {
         expect(response.statusCode).toBe(201);
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");

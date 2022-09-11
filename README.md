@@ -39,12 +39,3 @@ Server should be start on port 3001 make sure you're port is free to use
 <!-- TODO add commands for likes/dislikes -->
 - like a post : `curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer {token}" -d '{"like":1, "userId": "{MONGO_UID}"}' http://localhost:3001/api/posts/{POST_ID}/like`
 
-6314c8b41ec6a92121658f02
-
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MzE0YzhiNDFlYzZhOTIxMjE2NThmMDIiLCJpYXQiOjE2NjIzMDY1MjYsImV4cCI6MTY2MjM5MjkyNn0.POSCyAYsEnedNYDe5_NrpBe4_t85JwYNV_DWkJE_lKE
-
-curl -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MzE0YzhiNDFlYzZhOTIxMjE2NThmMDIiLCJpYXQiOjE2NjIzMDY1MjYsImV4cCI6MTY2MjM5MjkyNn0.POSCyAYsEnedNYDe5_NrpBe4_t85JwYNV_DWkJE_lKE" -d '{"content": "test", "userId": "6314c8b41ec6a92121658f02"}' http://localhost:3001/api/posts
-
-6314c9261ec6a92121658f0b
-
-curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MzE0YzhiNDFlYzZhOTIxMjE2NThmMDIiLCJpYXQiOjE2NjIzMDY1MjYsImV4cCI6MTY2MjM5MjkyNn0.POSCyAYsEnedNYDe5_NrpBe4_t85JwYNV_DWkJE_lKE" -d '{"like":1, "userId":"6314c8b41ec6a92121658f02" }' http://localhost:3001/api/posts/6314c9261ec6a92121658f0b/like

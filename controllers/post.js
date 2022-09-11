@@ -7,7 +7,7 @@ exports.createPost = (req, res, next) => {
     try {
         const postObj = req.body;
         delete postObj._id;
-        if (postObj.file != undefined) {
+        if (req.file != undefined) {
             const post = new Post({
                 ...postObj,
                 imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
@@ -59,7 +59,7 @@ exports.modifyPost = (req, res, next) => {
     if (req.file) {
         Post.findOne({ _id: req.params.id })
             .then((post) => {
-                const filename = sauce.imageUrl.split('/images/')[1];
+                const filename = post.imageUrl.split('/images/')[1];
                 fs.unlink(`images/${filename}`, () => {
                     Post.updateOne({ _id: req.params.id }, { ...postObject, _id: req.params.id })
                         .then(() => res.status(200).json({
