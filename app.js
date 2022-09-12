@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const userRoutes = require('./routes/user');
 const postRoutes = require('./routes/post');
 const path = require('path');
+const bodyParser = require('body-parser')
 const createAdminUser = require('./admin-helper');
 
 const app = express();
@@ -25,11 +26,9 @@ if (process.env.NODE_ENV != "test") {
 }
 
 app.use(express.json());
-app.use(
-  express.urlencoded({
-    extended: true,
-  })
-); 
+app.use(express.urlencoded({extended: true,})); 
+app.use(bodyParser.urlencoded({extended: false }));
+app.use(bodyParser.json());
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization, Postman-Token');

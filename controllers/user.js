@@ -97,20 +97,23 @@ exports.login = async (req, res, next) => {
 };
 
 // get one user
-exports.getOneUser = (req, res, next) => {
-    let user;
-    User.findbyId({ _id: req.params.id })
-        .then(user => res.status(200).json({
-            data: user,
-            msg: "user fetched",
+exports.getOneUser = async (req, res, next) => {
+    let usr;
+    try {
+        usr = await Users.findOne({ email: req.params.id });
+        res.status(200).json({
+            data: usr,
+            msg: 'User fetched',
             success: true
-        }))
-        .catch(error =>
-            res.status(404).json({
-                data: null,
-                msg: error,
-                success: false
-            }))
+        });
+        console.log(usr);
+    } catch (error) {
+        res.status(404).json({
+            data: null,
+            msg: 'Utilisateur non trouvé',
+            success: false
+        });
+    }
 };
 
 exports.delete = async (req, res) => {
