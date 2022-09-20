@@ -71,7 +71,7 @@ describe("test / route", () => {
       .then(response => {
         expect(response.statusCode).toBe(200);
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-        userLoginResponseBody = response.body;
+        userLoginResponseBody = response.body.data;
       })
   });
 
@@ -86,7 +86,7 @@ describe("test / route", () => {
         content: "test post"
       })
       .then(response => {
-        testPostId = response.body.data._id
+        // testPostId = response.body.data._id
         expect(response.statusCode).toBe(201);
         expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
         expect(response.body.msg).toStrictEqual("Post créé");
@@ -95,7 +95,7 @@ describe("test / route", () => {
       })
   });
 
-  // test for put route  
+  // // test for put route  
   test("given an existing user, when he modifies a post without a picture in the payload, then it should return a 200 status code and the expected payload", () => {
     return request(app)
       .put("/api/posts/" + testPostId)
@@ -114,10 +114,10 @@ describe("test / route", () => {
       })
   });
 
-  test("given an existing user, when he try to modify a post without a picture not created by himself, then it should return a 401 status code", async () => {
+  test("given an existing user, when he tries to modify a post without a picture not created by himself, then it should return a 401 status code", async () => {
     const response = await request(app)
       .put("/api/posts/" + testPostId)
-      .set('Authorization', 'Bearer ' + '5263562536342&se846')
+      .set('Authorization', 'Bearer ' + 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MzI5ZmYxMjE2YTc0NjJlNmUxNjczZGQiLCJpYXQiOjE2NjM2OTg5MjIsImV4cCI6MTY2Mzc4NTMyMn0.qdrpe2DsXwBs38q8-y_Yb2_LDMDjs7FBdGMXocH24U4')
       .set('Accept', 'application/json')
       .send({
         userId: userLoginResponseBody.userId,

@@ -27,7 +27,8 @@ router.post('/',
 )
 
 // modify one specific post in the data base mongoDB
-router.put('/:id',
+router.put(
+    '/:id',
     body('content')
         .not()
         .isEmpty()

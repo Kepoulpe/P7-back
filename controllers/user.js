@@ -85,7 +85,7 @@ exports.login = async (req, res, next) => {
         data: {
             isAdmin: usr.isAdmin,
             token: jwt.sign(
-                { userId: usr._id },
+                { userId: usr._id, isAdmin: usr.isAdmin },
                 process.env.RANDOM_SECRET_TOKEN,
                 { expiresIn: '24h' }
             ),
