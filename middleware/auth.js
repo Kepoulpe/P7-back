@@ -19,7 +19,7 @@ module.exports = async (req, res, next) => {
         }
     } catch (err) {
         res.status(401).json({
-            data: null,
+            data: err,
             msg: "Utilisateur non valide",
             success: false
         });

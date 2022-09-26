@@ -34,8 +34,11 @@ Server should be start on port 3001 make sure you're port is free to use
 - log regular a 2nd user in : `curl -H "Content-Type: application/json" -X POST -d '{"email":"test2@test.com","password":"2TEST_test"}' http://localhost:3001/api/auth/login`
 - create a post: `curl -H "Content-Type: application/json" -H "Authorization: Bearer {token}" -d '{"content": "test", "userId": "{MONGO_UID}"}' http://localhost:3001/api/posts`
 - update a post: `curl -X PUT -H "Content-Type: application/json" -H "Authorization: Bearer {token}" -d '{"content": "test update", "userId": "{MONGO_UID}"}' http://localhost:3001/api/posts/{POST_ID}`
-- update a post: `curl -X PUT -H "Content-Type: application/json" -H "Authorization: Bearer {token}" -d '{"content": "test update", "userId": "{MONGO_UID}"}' http://localhost:3001/api/posts/{POST_ID}`
+- update a post as an Admin: `curl -X PUT -H "Content-Type: application/json" -H "Authorization: Bearer {admin token}" -d '{"content": "test update", "userId": "{MONGO_UID}"}' http://localhost:3001/api/posts/{POST_ID}`
+- update a post with a fake jwt token: `curl -X PUT -H "Content-Type: application/json" -H "Authorization: Bearer faketoken" -d '{"content": "test update", "userId": "{MONGO_UID}"}' http://localhost:3001/api/posts/{POST_ID}`
 - delete a post: `curl -X DELETE -H "Content-Type: application/json" -H "Authorization: Bearer {token}" http://localhost:3001/api/posts/{POST_ID}`
-<!-- TODO add commands for likes/dislikes -->
+- delete a post as an Admin: `curl -X DELETE -H "Content-Type: application/json" -H "Authorization: Bearer { admin token}" http://localhost:3001/api/posts/{POST_ID}`
+- delete a post with a fake jwt token: `curl -X DELETE -H "Content-Type: application/json" -H "Authorization: Bearer faketoken" http://localhost:3001/api/posts/{POST_ID}`
 - like a post : `curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer {token}" -d '{"like":1, "userId": "{MONGO_UID}"}' http://localhost:3001/api/posts/{POST_ID}/like`
+
 
