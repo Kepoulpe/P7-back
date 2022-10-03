@@ -132,25 +132,24 @@ describe("test / route", () => {
   test("given an existing user, when he deletes a post not created by himself a post without a picture, then it should return a 401 status code", () => {
     return request(app)
       .delete("/api/posts/" + testPostId)
-      .set('Authorization', 'Bearer ' + '5263562536342&se846')
+      .set('Authorization', 'Bearer ' + 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MzNiMTgxNDI2Mzk3OTRjNWUyYmVlYzMiLCJpc0FkbWluIjpmYWxzZSwiaWF0IjoxNjY0ODE3MjAwLCJleHAiOjE2NjQ5MDM2MDB9.OGbxPoKHh7HzFEMt4bjdETNGIrX1HghdzWIdHBFgsYQ')
       .set('Accept', 'application/json')
       .then(response => {
-        expect(response.statusCode).toBe(401);
+        expect(response.statusCode).toBe(403);
       })
   });
 
-  // test("given an existing user, when he deletes a post created by himself a post without a picture, then it should return a 204 status code and the expected payload", () => {
-  //   return request(app)
-  //     .delete("/api/posts/" + testPostId)
-  //     .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
-  //     .set('Accept', 'application/json')
-  //     .then(response => {
-  //       expect(response.statusCode).toBe(204);
-  //     })
-  // });
-
+  test("given an existing user, when he deletes a post created by himself a post without a picture, then it should return a 204 status code", () => {
+    return request(app)
+      .delete("/api/posts/" + testPostId)
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Accept', 'application/json')
+      .then(response => {
+        expect(response.statusCode).toBe(204);
+      })
+  });
  
-  // test("given an existing user, when he creates a post with a picture, then it should return a 201 status code and the expected payload, and the uploaded file should exist on the server", () => {
+  // test("given an existing user, when he creates a post with a picture, then it should return a 201 status code and the expected payload", () => {
   //   return request(app)
   //     .post("/api/posts")
   //     .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
@@ -182,7 +181,7 @@ describe("test / route", () => {
   test('given a user with a fake JWT token, when he creates a post, then it should return a 401 status code and the expected response payload', () => {
     return request(app)
       .post("/api/posts")
-      .set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3ODkwIiwiY29udGVudCI6IllPTE8gSSdtIGEgaGFja2VyIn0.mNt9fPfJ3OGVg2fpRkDdzBCm7J_M-ZeOPwP4Rd9Lxmw')
+      .set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MzNiMTgxNDI2Mzk3OTRjNWUyYmVlYzMiLCJpc0FkbWluIjpmYWxzZSwiaWF0IjoxNjY0ODE3MjAwLCJleHAiOjE2NjQ5MDM2MDB9.OGbxPoKHh7HzFEMt4bjdETNGIrX1HghdzWIdHBFgsYQ')
       .set('Accept', 'application/json')
       .send({
         userId: userLoginResponseBody.userId,
@@ -327,17 +326,17 @@ describe("test / route", () => {
   //     })
   // });
 
-  // test("given an existing user, when he sends a request to delete his account, then it should return a 200 status code and payload {msg: 'Utilisateur supprimé'}", async () => {
-  //   return request(app)
-  //     .post("/api/auth/delete")
-  //     .send({ userId: userLoginResponseBody.userId })
-  //     .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
-  //     .set('Accept', 'application/json')
-  //     .then(response => {
-  //       expect(response.statusCode).toBe(200);
-  //       expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
-  //       expect(response.body.msg).toStrictEqual('Utilisateur supprimé');
-  //     })
-  // });
+  test("given an existing user, when he sends a request to delete his account, then it should return a 200 status code and payload {msg: 'Utilisateur supprimé'}", async () => {
+    return request(app)
+      .post("/api/auth/delete")
+      .send({ userId: userLoginResponseBody.userId })
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Accept', 'application/json')
+      .then(response => {
+        expect(response.statusCode).toBe(200);
+        expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+        expect(response.body.msg).toStrictEqual('Utilisateur supprimé');
+      })
+  });
 
 });

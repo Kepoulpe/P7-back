@@ -1,6 +1,9 @@
 const Post = require('../models/post');
 const fs = require('fs');
+const jwt = require('jsonwebtoken');
+
 const { likeDislikeLogic } = require('./likeDislike');
+const { verifyJwtToken } = require('../middleware/auth');
 
 // user can create one post in the database mongoDb
 exports.createPost = (req, res, next) => {
@@ -101,9 +104,20 @@ exports.modifyPost = (req, res, next) => {
 // delete one post on the data base mongoDB
 exports.deletePost = async (req, res, next) => {
 
+    // first we verify the token from the request
+    const decodedToken = verifyJwtToken(req);
+    if (!decodedToken) {
+        res.status(401).json({
+            data: null,
+            msg: "no auth provided",
+            success: false
+        });
+    }
+    const userIdFromToken = decodedToken.userId;
+    const isAdminFromToken = decodedToken.isAdmin;
+
     // first we get the request post to delete
     let post;
-    // is it necessary ?
     if (!req.params.id) {
         res.status(400).json({
             data: null,
@@ -128,6 +142,19 @@ exports.deletePost = async (req, res, next) => {
         res.status(404).json({
             data: null,
             msg: "no post found with that id",
+            success: false
+        });
+        return;
+    }
+
+    /**
+     * if the user from the post is not the same than the one from the token
+     * or is not admin we send a 403
+     */
+    if (post.userId != userIdFromToken && !isAdminFromToken) {
+        res.status(403).json({
+            data: null,
+            msg: "you are not authorized to delete that post",
             success: false
         });
         return;
