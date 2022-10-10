@@ -1,4 +1,5 @@
 const multer = require('multer');
+const { verifyJwtToken } = require('./auth');
 
 const MIME_TYPES = {
     'image/jpg': 'jpg',
@@ -17,4 +18,16 @@ const storage = multer.diskStorage({
     }
 });
 
-module.exports = multer({ storage }).single('imageUrl');
+module.exports = multer({ 
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        const token = req.body.userId;
+        const userVerified = verifyJwtToken(req);
+        // passing along the fact that the user is not authed in the request
+        if (!userVerified) {
+            req.authError = true;
+        }
+        // depending on the user token verification, file will get written on disk or not
+        cb(null, userVerified);
+    }
+}).single('imageUrl');

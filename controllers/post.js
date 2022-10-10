@@ -3,10 +3,13 @@ const fs = require('fs');
 const jwt = require('jsonwebtoken');
 
 const { likeDislikeLogic } = require('./likeDislike');
-const { verifyJwtToken } = require('../middleware/auth');
+const { verifyJwtToken, sendUnauthorizedRes } = require('../middleware/auth');
 
-// user can create one post in the database mongoDb
-exports.createPost = (req, res, next) => {
+exports.createPost = (req, res) => {
+    if (req.authError) {
+        sendUnauthorizedRes(res);
+        return;
+    }
     try {
         const postObj = req.body;
         delete postObj._id;
@@ -107,11 +110,7 @@ exports.deletePost = async (req, res, next) => {
     // first we verify the token from the request
     const decodedToken = verifyJwtToken(req);
     if (!decodedToken) {
-        res.status(401).json({
-            data: null,
-            msg: "no auth provided",
-            success: false
-        });
+        sendUnauthorizedRes(res);
     }
     const userIdFromToken = decodedToken.userId;
     const isAdminFromToken = decodedToken.isAdmin;
@@ -188,12 +187,15 @@ exports.deletePost = async (req, res, next) => {
 
 // get one post in the data base mongoDB 
 exports.getOnePost = (req, res, next) => {
+    // TODO test 404 when trying to get a post that does not exists
     Post.findOne({ _id: req.params.id })
-        .then(post => res.status(200).json({
-            data: post,
-            msg: "post fetched",
-            success: true
-        }))
+        .then(post => {
+            res.status(200).json({
+                data: post,
+                msg: "post fetched",
+                success: true
+            });
+        })
         .catch(error => 
             res.status(404).json({
             data: null,

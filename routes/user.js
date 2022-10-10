@@ -1,6 +1,6 @@
 const express = require('express');
 const usersCtlr = require("./../controllers/user");
-const auth = require('../middleware/auth');
+const {authMiddleware} = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
 
 const router = express.Router();
@@ -35,11 +35,11 @@ router.post(
     usersCtlr.login
 );
 
-router.post('/delete', auth, usersCtlr.delete);
+router.post('/delete', authMiddleware, usersCtlr.delete);
 
 router.get(
     '/',
-    auth,
+    authMiddleware,
     (req, res) => {
         res.status(200).json({ msg : "Auth is valid" })
     }
@@ -47,7 +47,7 @@ router.get(
 
 router.get(
     '/:id',
-    auth,
+    authMiddleware,
     usersCtlr.getOneUser
 )
 

@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { sendUnauthorizedRes } = require('../middleware/auth');
 
 const User = require('../models/user');
 
@@ -55,11 +56,7 @@ exports.login = async (req, res, next) => {
         return;
     }
     if (!usr) {
-        res.status(401).json({
-            data: null,
-            msg: 'Utilisateur non trouvé',
-            success: false
-        });
+        sendUnauthorizedRes(res);
         return;
     }
     let isPwdValid;
@@ -74,11 +71,7 @@ exports.login = async (req, res, next) => {
         return;
     }
     if (!isPwdValid) {
-        res.status(401).json({
-            data: null,
-            msg: 'Mot de passe erroné',
-            success: false
-        });
+        sendUnauthorizedRes(res);
         return;
     }
     res.status(200).json({

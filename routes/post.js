@@ -3,12 +3,12 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 
 const postCtrl = require('../controllers/post');
-const auth = require('../middleware/auth');
+const {authMiddleware} = require('../middleware/auth');
 const multer = require('../middleware/multer-config');
 
 // user can create one post in the data base mongoDB
 router.post('/',
-    auth,
+    authMiddleware,
     multer,
     body('content')
         .not()
@@ -42,7 +42,7 @@ router.put(
         };
         next()
     },
-    auth,
+    authMiddleware,
     multer,
     postCtrl.modifyPost,
 );
@@ -54,19 +54,19 @@ router.delete('/:id',
 
 // get all post in the data base mongoDB
 router.get('/',
-    auth,
+    authMiddleware,
     postCtrl.getAllPosts
 );
 
 // get one post in the data base mongoDB
 router.get('/:id',
-    auth,
+    authMiddleware,
     postCtrl.getOnePost
 );
 
 // route for like/dislike
 router.post('/:id/like',
-    auth,
+    authMiddleware,
     postCtrl.likeDislikePost
 );
 module.exports = router;
