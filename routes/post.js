@@ -29,6 +29,8 @@ router.post('/',
 // modify one specific post in the data base mongoDB
 router.put(
     '/:id',
+    authMiddleware,
+    multer,
     body('content')
         .not()
         .isEmpty()
@@ -42,8 +44,6 @@ router.put(
         };
         next()
     },
-    authMiddleware,
-    multer,
     postCtrl.modifyPost,
 );
 

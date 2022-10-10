@@ -153,6 +153,23 @@ describe("test / route", () => {
       })
   });
 
+  test("given an existing user, when he he tries to modify his post with a picture, then it should return a 200 status code and the expected payload", () => {
+    return request(app)
+      .put("/api/posts/" + testPostId)
+      .set('Authorization', 'Bearer ' + userLoginResponseBody.token)
+      .set('Accept', 'multipart/form-data')
+      .field("content", "test content upload")
+      .field("userId", userLoginResponseBody.userId)
+      .attach("imageUrl", path.resolve(__dirname, "test2.png"))
+      .then(response => {
+        expect(response.statusCode).toBe(200);
+        expect(response.headers["content-type"]).toEqual("application/json; charset=utf-8");
+        expect(response.body.msg).toStrictEqual("Post mis à jour");
+        expect(response.body.success).toBeTruthy();
+        expect(response.body.data.content).toStrictEqual("test content upload");
+      })
+  });
+
   // test for delete route
   test("given an existing user, when he deletes a post not created by himself a post without a picture, then it should return a 403 status code", async () => {
     // arrange

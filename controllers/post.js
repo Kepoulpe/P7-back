@@ -59,17 +59,18 @@ exports.modifyPost = (req, res, next) => {
     // check if user modify the picture
     const postObject = req.file ?
         {
-            ...JSON.parse(req.body.post),
-            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+            content: req.body.content,
+            userId: req.body.userId,
+            // TODO store host in .env
+            imageUrl: `${req.protocol}://localhost:3001/images/${req.file.filename}`
         } : { ...req.body };
     if (req.file) {
         Post.findOne({ _id: req.params.id })
             .then((post) => {
-                const filename = post.imageUrl.split('/images/')[1];
-                fs.unlink(`images/${filename}`, () => {
+                if (!post.imageUrl) {
                     Post.updateOne({ _id: req.params.id }, { ...postObject, _id: req.params.id })
                         .then(() => res.status(200).json({
-                            data: post,
+                            data: postObject,
                             msg: 'Post mis à jour',
                             success: true
                         }))
@@ -78,13 +79,31 @@ exports.modifyPost = (req, res, next) => {
                             msg: error,
                             success: false
                         }));
-                })
+                } else {
+                    const filename = post.imageUrl.split('/images/')[1];
+                    fs.unlink(`images/${filename}`, () => {
+                        Post.updateOne({ _id: req.params.id }, { ...postObject, _id: req.params.id })
+                            .then(() => res.status(200).json({
+                                data: post,
+                                msg: 'Post mis à jour',
+                                success: true
+                            }))
+                            .catch(error => res.status(400).json({
+                                data: null,
+                                msg: error,
+                                success: false
+                            }));
+                    })
+                }
             })
-            .catch(error => res.status(500).json({
-                data: null,
-                msg: error,
-                success: false
-            }));
+            .catch(error => {
+                console.error(error);
+                res.status(500).json({
+                    data: null,
+                    msg: error,
+                    success: false
+                })
+            });
 
     } else {
         Post.updateOne({ _id: req.params.id }, { ...postObject, _id: req.params.id })
