@@ -9,11 +9,11 @@ router.post(
     '/signup', 
     body('email').isEmail(),
     body('password')
-        .isLength({ min: 8 })
+        // .isLength({ min: 8 })
         .custom(pwd => {
-            let re = new RegExp('^(?=.*[0-9])(?=.*[!@#$%^&_*])(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9!@#$%^&_*]', 'g');
+            let re = new RegExp('^(?=.*[0-9])(?=.*[!@#$%^&_*])(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9!@#$%^&_*]{8}', 'g');
             if (!re.test(pwd)) {
-                throw new Error('Your password must be 8 characters at least and should include letters, numbers, and symbols');
+                throw new Error('Votre mot de passe doit contenir 8 caractères au moins et inclure des lettres majuscules/minuscules, nombres et symboles');
             }
             return true;
         }),
