@@ -56,8 +56,12 @@ exports.login = async (req, res, next) => {
         return;
     }
     if (!usr) {
-        sendUnauthorizedRes(res);
-        return;
+        res.status(401).json({
+            data: null,
+            msg: "Utilisateur non valide",
+            success: false
+        });
+        return res;
     }
     let isPwdValid;
     try {
@@ -71,8 +75,12 @@ exports.login = async (req, res, next) => {
         return;
     }
     if (!isPwdValid) {
-        sendUnauthorizedRes(res);
-        return;
+        res.status(401).json({
+            data: null,
+            msg: "Mot de passe incorrect",
+            success: false
+        });
+        return res;
     }
     res.status(200).json({
         data: {
